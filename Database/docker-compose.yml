@@ -1,0 +1,18 @@
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: mypass123
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - mysql_data:/var/lib/myssql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+    container_name: jobnexus-db
+
+volumes:
+  mysql_data:
