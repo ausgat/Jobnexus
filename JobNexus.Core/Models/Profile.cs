@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace JobNexus.Models;
+namespace JobNexus.Core.Models;
 
 public partial class Profile
 {

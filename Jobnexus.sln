@@ -2,7 +2,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobNexus", "JobNexus\JobNexus.csproj", "{F2FA6A95-9364-0260-E791-F683D2BA52FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobNexus.Web", "JobNexus.Web\JobNexus.Web.csproj", "{F2FA6A95-9364-0260-E791-F683D2BA52FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobNexus.Services", "JobNexus.Services\JobNexus.Services.csproj", "{F945F0BB-1A73-4369-8D1F-FECB1930A94C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobNexus.Core", "JobNexus.Core\JobNexus.Core.csproj", "{3EDC4664-378E-47B9-96A3-93CC0C5E65C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobNexus.Data", "JobNexus.Data\JobNexus.Data.csproj", "{D616D4B9-E118-4C9E-AEAC-B356F5AD1E37}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobNexus.Tests", "JobNexus.Tests\JobNexus.Tests.csproj", "{87FD0068-DF70-4696-BB2F-C21995FB6A49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +22,22 @@ Global
 		{F2FA6A95-9364-0260-E791-F683D2BA52FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2FA6A95-9364-0260-E791-F683D2BA52FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2FA6A95-9364-0260-E791-F683D2BA52FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F945F0BB-1A73-4369-8D1F-FECB1930A94C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F945F0BB-1A73-4369-8D1F-FECB1930A94C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F945F0BB-1A73-4369-8D1F-FECB1930A94C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F945F0BB-1A73-4369-8D1F-FECB1930A94C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EDC4664-378E-47B9-96A3-93CC0C5E65C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EDC4664-378E-47B9-96A3-93CC0C5E65C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EDC4664-378E-47B9-96A3-93CC0C5E65C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EDC4664-378E-47B9-96A3-93CC0C5E65C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D616D4B9-E118-4C9E-AEAC-B356F5AD1E37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D616D4B9-E118-4C9E-AEAC-B356F5AD1E37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D616D4B9-E118-4C9E-AEAC-B356F5AD1E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D616D4B9-E118-4C9E-AEAC-B356F5AD1E37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87FD0068-DF70-4696-BB2F-C21995FB6A49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87FD0068-DF70-4696-BB2F-C21995FB6A49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87FD0068-DF70-4696-BB2F-C21995FB6A49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87FD0068-DF70-4696-BB2F-C21995FB6A49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
