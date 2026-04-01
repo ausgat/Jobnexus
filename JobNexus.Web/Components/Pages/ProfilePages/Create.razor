@@ -1,0 +1,82 @@
+@page "/profiles/create"
+@using Microsoft.EntityFrameworkCore
+@using JobNexus.Core.Models
+@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Profile</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="ProfileForm" OnValidSubmit="AddProfile" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username:</label> 
+                <InputText id="username" @bind-Value="ProfileForm.Username" class="form-control" />
+                <ValidationMessage For="() => ProfileForm.Username" class="text-danger" /> 
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label> 
+                <InputText id="password" @bind-Value="ProfileForm.Password" class="form-control" /> 
+                <ValidationMessage For="() => ProfileForm.Password" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label> 
+                <InputText id="email" @bind-Value="ProfileForm.Email" class="form-control" /> 
+                <ValidationMessage For="() => ProfileForm.Email" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="ProfileForm.Name" class="form-control" /> 
+                <ValidationMessage For="() => ProfileForm.Name" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="bio" class="form-label">Bio:</label> 
+                <InputText id="bio" @bind-Value="ProfileForm.Bio" class="form-control" /> 
+                <ValidationMessage For="() => ProfileForm.Bio" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="location" class="form-label">Location:</label> 
+                <InputText id="location" @bind-Value="ProfileForm.Location" class="form-control" /> 
+                <ValidationMessage For="() => ProfileForm.Location" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/profiles">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private ProfileForm ProfileForm { get; set; } = default!;
+
+    protected override void OnInitialized() => ProfileForm ??= new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddProfile()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+
+        var profile = new Profile
+        {
+            Username = ProfileForm.Username,
+            Password = ProfileForm.Password,
+            Email = ProfileForm.Email,
+            Name = ProfileForm.Name,
+            Bio = ProfileForm.Bio,
+            Location = ProfileForm.Location
+        };
+        context.Profiles.Add(profile);
+
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/profiles");
+    }
+}

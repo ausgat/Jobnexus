@@ -1,0 +1,40 @@
+@page "/profiles"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using JobNexus.Core.Models
+@using JobNexus.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="profiles/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Profiles">
+    <PropertyColumn Property="profile => profile.Password" />
+    <PropertyColumn Property="profile => profile.Email" />
+    <PropertyColumn Property="profile => profile.Name" />
+    <PropertyColumn Property="profile => profile.Bio" />
+    <PropertyColumn Property="profile => profile.Location" />
+
+    <TemplateColumn Context="profile">
+        <a href="@($"profiles/edit?username={profile.Username}")">Edit</a> |
+        <a href="@($"profiles/details?username={profile.Username}")">Details</a> |
+        <a href="@($"profiles/delete?username={profile.Username}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private JobNexusContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
