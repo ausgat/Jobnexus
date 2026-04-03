@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\JobNexus.Core\JobNexus.Core.csproj" />
     <ProjectReference Include="..\JobNexus.Data\JobNexus.Data.csproj" />
+    <ProjectReference Include="..\JobNexus.Services\JobNexus.Services.csproj" /> <!--added this-->
   </ItemGroup>
 
   <ItemGroup>

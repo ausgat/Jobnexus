@@ -2,6 +2,7 @@ using JobNexus.Core.Models;
 using JobNexus.Web.Components;
 using JobNexus.Data;
 using Microsoft.EntityFrameworkCore;
+using JobNexus.Services; //new thing
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddDbContextFactory<JobNexusContext>(options =>
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddHostedService<JobSyncService>(); //new
 
 var app = builder.Build();
 
