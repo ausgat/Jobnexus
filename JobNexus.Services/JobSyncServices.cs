@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;  // fixed typo
+﻿using Microsoft.Extensions.DependencyInjection;  
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using JobNexus.Data;
@@ -29,7 +29,7 @@ public class JobSyncService : BackgroundService
         // Run once immediately on startup, then on interval
         await RunSync(stoppingToken);
 
-        using PeriodicTimer timer = new(_interval);  // fixed typo: PeriodicTimer not PeriodicTime
+        using PeriodicTimer timer = new(_interval);  
 
         try
         {
@@ -66,7 +66,7 @@ public class JobSyncService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Job sync cycle failed.");  // fixed casing: LogError not logError
+            _logger.LogError(ex, "Job sync cycle failed.");  
         }
     }
 }
