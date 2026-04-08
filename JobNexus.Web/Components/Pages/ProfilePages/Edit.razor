@@ -1,6 +1,7 @@
 @page "/profiles/edit"
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
+@using JobNexus.Web.ViewModels
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -62,7 +63,7 @@ else
     private string? Username { get; set; }
 
     [SupplyParameterFromForm]
-    private ProfileForm? ProfileForm { get; set; }
+    private ProfileModel? ProfileForm { get; set; }
 
     private Profile? Profile { get; set; }
     
@@ -73,7 +74,7 @@ else
 
         if (Profile is not null)
         {
-            ProfileForm ??= new ProfileForm
+            ProfileForm ??= new ProfileModel
             {
                 Username = Profile.Username,
                 Password = Profile.Password,

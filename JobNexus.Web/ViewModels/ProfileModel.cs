@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace JobNexus.Web.ViewModels;
 
-namespace JobNexus.Core.Models;
-
-public partial class ProfileForm
+public partial class ProfileModel
 {
     public string Username { get; set; } = null!;
 

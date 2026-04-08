@@ -1,0 +1,20 @@
+@page "/search"
+<PageTitle>Search</PageTitle>
+
+<div class="btn-toolbar" role="toolbar">
+    <InputText @bind-Value="_keywordText" class="me-2" placeholder="Keywords&hellip;" />
+    <div class="btn-group me-2" role="group">
+        <select class="btn-primary">
+            <option value="">Employment Level</option>
+            <option value="ft">Full-time</option>
+            <option value="pt">Part-time</option>
+            <option value="tmp">Temporary</option>
+            <option value="int">Internship</option>
+        </select>
+    </div>
+    <button type="button" class="btn btn-primary">Search</button>
+</div>
+
+@code {
+    private string _keywordText = "";
+}
