@@ -1,20 +1,86 @@
 @page "/search"
+@using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Components.QuickGrid
+@rendermode InteractiveServer
 <PageTitle>Search</PageTitle>
 
 <div class="btn-toolbar" role="toolbar">
     <InputText @bind-Value="_keywordText" class="me-2" placeholder="Keywords&hellip;" />
     <div class="btn-group me-2" role="group">
-        <select class="btn-primary">
+        <InputSelect @bind-Value="_employmentLevel" class="btn btn-primary">
             <option value="">Employment Level</option>
             <option value="ft">Full-time</option>
             <option value="pt">Part-time</option>
             <option value="tmp">Temporary</option>
             <option value="int">Internship</option>
-        </select>
+        </InputSelect>
     </div>
-    <button type="button" class="btn btn-primary">Search</button>
+    <div class="input-group me-2" role="group">
+        <span class="input-group-text" id="posted-after">
+            <InputCheckbox @bind-Value="_usePostedAfter"/> Posted after
+        </span>
+        <InputDate class="input-group-text" aria-describedby="posted-after" @bind-Value="_postedAfter"/>
+    </div>
+    <button type="button" class="btn btn-primary" @onclick="HandleSearch">Search</button>
 </div>
+
+<p>
+    Current options:
+    @_employmentLevel,
+    @if (_usePostedAfter) {
+        <text>Posted after @_postedAfter</text>
+    }
+</p>
+
+@if (_jobListings != null)
+{
+    <QuickGrid Class="table" Items="@_jobListings.AsQueryable()">
+        <PropertyColumn Property="job => job.Title" />
+        <PropertyColumn Property="job => job.Description" />
+        <PropertyColumn Property="job => job.Pay" />
+        <PropertyColumn Property="job => job.DatePosted" />
+
+        <TemplateColumn Context="job">
+            <a href="@(job.ApplyUrl)">Apply</a>
+        </TemplateColumn>
+    </QuickGrid>
+}
 
 @code {
     private string _keywordText = "";
+    private string _employmentLevel = "";
+    private bool _usePostedAfter = false;
+    private DateTime _postedAfter = DateTime.Now;
+
+    private List<Job>? _jobListings;
+
+    private void HandleSearch()
+    {
+        _jobListings = new List<Job>();
+        _jobListings.Add(new Job
+        {
+            Title = "Software Engineer",
+            Description = "Make software",
+            ApplyUrl = "http://google.com",
+            Pay = 100,
+            DatePosted = DateTime.Now
+        });
+        _jobListings.Add(new Job
+        {
+            Title = "Janitor",
+            Description = "Clean up",
+            ApplyUrl = "http://google.com",
+            Pay = 20,
+            DatePosted = DateTime.Now
+        });
+        _jobListings.Add(new Job
+        {
+            Title = "Dentist",
+            Description = "Pull teeth",
+            ApplyUrl = "http://google.com",
+            Pay = 2000,
+            DatePosted = DateTime.Now
+        });
+    }
+
 }
