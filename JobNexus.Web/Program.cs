@@ -3,8 +3,11 @@ using JobNexus.Web.Components;
 using JobNexus.Data;
 using Microsoft.EntityFrameworkCore;
 using JobNexus.Services; //new thing
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMudServices();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

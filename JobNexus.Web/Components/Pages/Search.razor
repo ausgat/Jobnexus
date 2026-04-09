@@ -1,6 +1,5 @@
 @page "/search"
 @using JobNexus.Core.Models
-@using Microsoft.AspNetCore.Components.QuickGrid
 @rendermode InteractiveServer
 <PageTitle>Search</PageTitle>
 
@@ -34,16 +33,15 @@
 
 @if (_jobListings != null)
 {
-    <QuickGrid Class="table" Items="@_jobListings.AsQueryable()">
-        <PropertyColumn Property="job => job.Title" />
-        <PropertyColumn Property="job => job.Description" />
-        <PropertyColumn Property="job => job.Pay" />
-        <PropertyColumn Property="job => job.DatePosted" />
-
-        <TemplateColumn Context="job">
-            <a href="@(job.ApplyUrl)">Apply</a>
-        </TemplateColumn>
-    </QuickGrid>
+    <MudDataGrid Items="@_jobListings.Take(4)">
+        <Columns>
+            <PropertyColumn Property="x => x.Title" />
+            <PropertyColumn Property="x => x.Description" />
+            <PropertyColumn Property="x => x.ApplyUrl" />
+            <PropertyColumn Property="x => x.Pay" />
+            <PropertyColumn Property="x => x.DatePosted" />
+        </Columns>
+    </MudDataGrid>
 }
 
 @code {
