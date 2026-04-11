@@ -1,6 +1,6 @@
 ﻿namespace JobNexus.Tests;
 
-public class UnitTest1
+public class JobUpdateTest
 {
     [Fact]
     public void Test1()
