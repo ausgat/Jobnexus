@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using JobNexus.Core.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace JobNexus.Data;
 
-public partial class JobNexusContext : DbContext
+public partial class JobNexusContext : IdentityDbContext<Profile>
 {
     public JobNexusContext()
     {
@@ -36,6 +37,8 @@ public partial class JobNexusContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.Entity<Certification>(entity =>
         {
             entity.HasKey(e => e.CertId).HasName("PRIMARY");
@@ -126,28 +129,16 @@ public partial class JobNexusContext : DbContext
 
         modelBuilder.Entity<Profile>(entity =>
         {
-            entity.HasKey(e => e.Username).HasName("PRIMARY");
-
             entity.ToTable("Profile");
-
-            entity.Property(e => e.Username)
-                .HasMaxLength(50)
-                .HasColumnName("username");
             entity.Property(e => e.Bio)
                 .HasMaxLength(200)
                 .HasColumnName("bio");
-            entity.Property(e => e.Email)
-                .HasMaxLength(100)
-                .HasColumnName("email");
             entity.Property(e => e.Location)
                 .HasMaxLength(200)
                 .HasColumnName("location");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
-            entity.Property(e => e.Password)
-                .HasMaxLength(50)
-                .HasColumnName("password");
 
             entity.HasMany(d => d.Jobs).WithMany(p => p.Usernames)
                 .UsingEntity<Dictionary<string, object>>(

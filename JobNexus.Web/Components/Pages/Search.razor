@@ -1,5 +1,8 @@
 @page "/search"
+@attribute [Authorize]
 @using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
 <PageTitle>Search</PageTitle>
 
 <div class="btn-toolbar" role="toolbar">
