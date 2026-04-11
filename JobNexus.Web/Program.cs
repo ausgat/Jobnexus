@@ -22,7 +22,8 @@ builder.Services.AddDbContextFactory<JobNexusContext>(options =>
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddHostedService<JobSyncService>(); //new
+builder.Services.AddHostedService<JobSyncService>();
+builder.Services.AddScoped<SearchService>();
 
 var app = builder.Build();
 

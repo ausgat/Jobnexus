@@ -1,18 +1,12 @@
 @page "/search"
 @using JobNexus.Core.Models
+@using JobNexus.Core.Search
+@using JobNexus.Services
+@inject SearchService SearchService
 <PageTitle>Search</PageTitle>
 
 <div class="btn-toolbar" role="toolbar">
     <InputText @bind-Value="_keywordText" class="me-2" placeholder="Keywords&hellip;" />
-    <div class="btn-group me-2" role="group">
-        <InputSelect @bind-Value="_employmentLevel" class="btn btn-primary">
-            <option value="">Employment Level</option>
-            <option value="ft">Full-time</option>
-            <option value="pt">Part-time</option>
-            <option value="tmp">Temporary</option>
-            <option value="int">Internship</option>
-        </InputSelect>
-    </div>
     <div class="input-group me-2" role="group">
         <span class="input-group-text" id="posted-after">
             <InputCheckbox @bind-Value="_usePostedAfter"/> Posted after
@@ -22,17 +16,14 @@
     <button type="button" class="btn btn-primary" @onclick="HandleSearch">Search</button>
 </div>
 
-<p>
-    Current options:
-    @_employmentLevel,
-    @if (_usePostedAfter) {
-        <text>Posted after @_postedAfter</text>
-    }
-</p>
+@if (!string.IsNullOrEmpty(_infoMessage))
+{
+    <p>@_infoMessage</p>
+}
 
 @if (_jobListings != null)
 {
-    <MudDataGrid Items="@_jobListings.Take(4)">
+    <MudDataGrid Items="@_jobListings">
         <Columns>
             <PropertyColumn Property="x => x.Title" />
             <PropertyColumn Property="x => x.Description" />
@@ -44,40 +35,27 @@
 }
 
 @code {
+    private string? _infoMessage;
+    
     private string _keywordText = "";
-    private string _employmentLevel = "";
     private bool _usePostedAfter = false;
     private DateTime _postedAfter = DateTime.Now;
 
     private List<Job>? _jobListings;
 
-    private void HandleSearch()
+    private async Task HandleSearch()
     {
-        _jobListings = new List<Job>();
-        _jobListings.Add(new Job
+        _infoMessage = "";
+        
+        var query = new SearchQuery
         {
-            Title = "Software Engineer",
-            Description = "Make software",
-            ApplyUrl = "http://google.com",
-            Pay = 100,
-            DatePosted = DateTime.Now
-        });
-        _jobListings.Add(new Job
-        {
-            Title = "Janitor",
-            Description = "Clean up",
-            ApplyUrl = "http://google.com",
-            Pay = 20,
-            DatePosted = DateTime.Now
-        });
-        _jobListings.Add(new Job
-        {
-            Title = "Dentist",
-            Description = "Pull teeth",
-            ApplyUrl = "http://google.com",
-            Pay = 2000,
-            DatePosted = DateTime.Now
-        });
+            Keywords = _keywordText.Split(' ').ToList()
+        };
+        if (_usePostedAfter)
+            query.DatePostedAfter = _postedAfter;
+        _jobListings = await SearchService.SearchAsync(query);
+        
+        if (_jobListings.Count == 0)
+            _infoMessage = "No results matched your search terms.";
     }
-
 }
