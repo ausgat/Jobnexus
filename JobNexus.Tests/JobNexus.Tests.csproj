@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.14" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
         <PackageReference Include="MudBlazor" Version="9.3.0" />
         <PackageReference Include="xunit" Version="2.9.3"/>
@@ -17,6 +18,11 @@
 
     <ItemGroup>
         <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\JobNexus.Data\JobNexus.Data.csproj" />
+      <ProjectReference Include="..\JobNexus.Services\JobNexus.Services.csproj" />
     </ItemGroup>
 
 </Project>

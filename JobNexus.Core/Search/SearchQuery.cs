@@ -1,3 +1,5 @@
+using JobNexus.Core.Models;
+
 namespace JobNexus.Core.Search;
 
 /// <summary>
@@ -8,15 +10,12 @@ public class SearchQuery
     /// <summary>
     /// List of keywords to search in job listings.
     /// </summary>
-    public List<string> Keywords { get; set; } = [];
-    
-    /// <summary>
-    /// Maximum distance to search for jobs.
-    /// </summary>
-    public int? DistanceInMiles { get; set; }
-    
+    public List<string> Keywords { get; init; } = [""];
+
     /// <summary>
     /// Earliest posting date to include jobs.
     /// </summary>
     public DateTime? DatePostedAfter { get; set; }
+    
+    public string? Company { get; set; }
 }
