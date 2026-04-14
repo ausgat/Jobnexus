@@ -33,8 +33,7 @@ namespace JobNexus.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("job_id");
 
-                    b.HasKey("Username", "JobId")
-                        .HasName("PRIMARY");
+                    b.HasKey("Username", "JobId");
 
                     b.HasIndex(new[] { "JobId" }, "job_id");
 

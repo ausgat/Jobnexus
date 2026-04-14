@@ -153,7 +153,7 @@ public partial class JobNexusContext : IdentityDbContext<Profile>
                         .HasConstraintName("Applied_ibfk_1"),
                     j =>
                     {
-                        j.HasKey("Username", "JobId").HasName("PRIMARY");
+                        j.HasKey("Username", "JobId");
                         j.ToTable("Applied");
                         j.HasIndex(new[] { "JobId" }, "job_id");
                         j.IndexerProperty<string>("Username")
