@@ -1,0 +1,106 @@
+@using JobNexus.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Material.Filled.Construction" Size="Size.Small" Class="mx-2"/>
+                <MudText Typo="Typo.h6">Skills</MudText>
+            </MudStack>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudTooltip Text="Add a Skill">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="@ToggleSkillForm" />
+            </MudTooltip>
+            <MudPopover Open="@_skillFormOpen">
+                <MudStack Row="true" Spacing="2" Class="p-2">
+                    <MudFocusTrap DefaultFocus="DefaultFocus.FirstChild">
+                        <MudTextField T="string" @bind-Value="_skillFormText"
+                                      Label="Skill" Variant="Variant.Outlined"
+                                      Margin="Margin.Dense" />
+                    </MudFocusTrap>
+                    <MudIconButton Icon="@Icons.Material.Filled.Cancel" Color="Color.Default" OnClick="@CloseSkillForm"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Primary" OnClick="@AddSkill"/>
+                </MudStack>
+            </MudPopover>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="@_skills" Context="skill"
+                  Hover="true" Breakpoint="Breakpoint.Xs" Elevation="0" Dense="true">
+            <RowTemplate>
+                <MudTd>@skill.SkillName</MudTd>
+                <MudTd Style="text-align: right">
+                    <MudIconButton
+                        Icon="@Icons.Material.Filled.Delete"
+                        OnClick="@(() => RemoveSkill(skill.SkillId))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string? Username { get; set; }
+    
+    private List<Skill> _skills = [];
+    private bool _skillFormOpen;
+    private string _skillFormText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var profile = await context.Profiles.Include("Skills")
+            .FirstOrDefaultAsync(m => m.Username == Username);
+
+        if (profile is not null)
+        {
+            _skills = profile.Skills.ToList();
+        }
+    }
+
+    private void ToggleSkillForm() => _skillFormOpen = !_skillFormOpen;
+
+    private void CloseSkillForm()
+    {
+        _skillFormOpen = false;
+        _skillFormText = "";
+    }
+
+    private async Task AddSkill()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var profile = await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
+
+        if (profile is not null && !string.IsNullOrWhiteSpace(_skillFormText))
+        {
+            var newSkill = new Skill { SkillName = _skillFormText };
+            profile.Skills.Add(newSkill);
+            await context.SaveChangesAsync();
+            _skills.Add(newSkill);
+            CloseSkillForm();
+        }
+    }
+
+    private async Task RemoveSkill(int skillId)
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var profile = await context.Profiles
+            .Include(profile => profile.Skills)
+            .FirstOrDefaultAsync(m => m.Username == Username);
+
+        if (profile is not null)
+        {
+            var skill = profile.Skills.FirstOrDefault(m => m.SkillId == skillId);
+            if (skill is not null)
+            {
+                profile.Skills.Remove(skill);
+                await context.SaveChangesAsync();
+                _skills.RemoveAll(c => c.SkillId == skillId);
+            }
+        }       
+    }
+}
