@@ -13,5 +13,5 @@ public partial class Certification
 
     public string? Username { get; set; }
 
-    public virtual Profile? UsernameNavigation { get; set; }
+    public virtual Profile? Profile { get; set; }
 }
