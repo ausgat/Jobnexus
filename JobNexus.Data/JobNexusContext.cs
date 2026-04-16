@@ -55,7 +55,7 @@ public partial class JobNexusContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("username");
 
-            entity.HasOne(d => d.UsernameNavigation).WithMany(p => p.Certifications)
+            entity.HasOne(d => d.Profile).WithMany(p => p.Certifications)
                 .HasForeignKey(d => d.Username)
                 .HasConstraintName("Certification_ibfk_1");
         });

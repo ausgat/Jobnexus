@@ -3,7 +3,8 @@
 @using JobNexus.Core.Models
 @using JobNexus.Data
 @implements IAsyncDisposable
-@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
+@inject IDbContextFactory<JobNexusContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <PageTitle>Index</PageTitle>
 
@@ -13,7 +14,7 @@
     <a href="profiles/create">Create New</a>
 </p>
 
-<MudDataGrid Items="@context.Profiles">
+<MudDataGrid T="Profile" Items="@_context.Profiles" RowClick="@OnRowClick">
     <Columns>
         <PropertyColumn Property="x => x.Username" />
         <PropertyColumn Property="x => x.Email" />
@@ -24,12 +25,17 @@
 </MudDataGrid>
 
 @code {
-    private JobNexusContext context = default!;
+    private JobNexusContext _context = null!;
 
     protected override void OnInitialized()
     {
-        context = DbFactory.CreateDbContext();
+        _context = DbFactory.CreateDbContext();
     }
 
-    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+    private void OnRowClick(DataGridRowClickEventArgs<Profile> args)
+    {
+        NavigationManager.NavigateTo($"/profiles/details?username={args.Item.Username}");
+    }
+
+    public async ValueTask DisposeAsync() => await _context.DisposeAsync();
 }
