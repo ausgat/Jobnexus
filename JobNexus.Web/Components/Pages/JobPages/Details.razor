@@ -1,0 +1,83 @@
+@page "/jobs/details"
+@using Microsoft.EntityFrameworkCore
+@using JobNexus.Core.Models
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Job Details</PageTitle>
+
+@if (_job is null)
+{
+    <p><em>Loading...</em></p>
+}
+else {
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIcon Icon="@Icons.Material.Filled.Work" Color="Color.Default"/>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1">@_job.Title</MudText>
+                <MudText Typo="Typo.body2">@_job.Company?.CompanyName</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudTooltip Text="Apply">
+                    <MudIconButton
+                        Icon="@Icons.Material.Filled.Checklist"
+                        Color="Color.Default"
+                        Href="@_job.ApplyUrl"/>
+                </MudTooltip>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSimpleTable Elevation="0">
+                        <tbody>
+                        <tr>
+                            <th>Job Title</th>
+                            <td>@_job.Title</td>
+                        </tr>
+                        <tr>
+                            <th>Company</th>
+                            <td>@_job.Company?.CompanyName</td>
+                        </tr>
+                        <tr>
+                            <th>Job Description</th>
+                            <td>@_job.Description</td>
+                        </tr>
+                        <tr>
+                            <th>Pay</th>
+                            <td>$@_job.Pay</td>
+                        </tr>
+                        <tr>
+                            <th>Date Posted</th>
+                            <td>@_job.DatePosted</td>
+                        </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    private Job? _job;
+
+    [SupplyParameterFromQuery]
+    private int JobId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _job = await context.Jobs
+            .Include(x => x.Company)
+            .FirstOrDefaultAsync(j => j.JobId == JobId);
+
+        if (_job is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

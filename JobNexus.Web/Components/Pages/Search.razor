@@ -2,44 +2,45 @@
 @using JobNexus.Core.Models
 @using JobNexus.Core.Search
 @using JobNexus.Services
+@inject NavigationManager NavManager
 @inject SearchService SearchService
 <PageTitle>Search</PageTitle>
 
-<div class="btn-toolbar" role="toolbar">
-    <InputText @bind-Value="_keywordText" class="me-2" placeholder="Keywords&hellip;" />
-    <div class="input-group me-2" role="group">
-        <span class="input-group-text" id="posted-after">
-            <InputCheckbox @bind-Value="_usePostedAfter"/> Posted after
-        </span>
-        <InputDate class="input-group-text" aria-describedby="posted-after" @bind-Value="_postedAfter"/>
-    </div>
-    <button type="button" class="btn btn-primary" @onclick="HandleSearch">Search</button>
-</div>
+<MudStack Spacing="4">
+    <MudPaper>
+        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="p-2">
+            <MudTextField @bind-Value="_keywordText" Placeholder="Keywords" Variant="Variant.Outlined" Margin="Margin.Dense"/>
+            <MudCheckBox @bind-Value="_usePostedAfter" Label="Posted after" Dense="true"/>
+            <MudDatePicker @bind-Date="_postedAfter" Disabled="@(!_usePostedAfter)" Margin="Margin.Dense"/>
+            <MudButton OnClick="@HandleSearch" Variant="Variant.Filled" Color="Color.Primary">Search</MudButton>
+        </MudStack>
+    </MudPaper>
 
-@if (!string.IsNullOrEmpty(_infoMessage))
-{
-    <p>@_infoMessage</p>
-}
+    @if (!string.IsNullOrEmpty(_infoMessage))
+    {
+        <p>@_infoMessage</p>
+    }
 
-@if (_jobListings != null)
-{
-    <MudDataGrid Items="@_jobListings">
-        <Columns>
-            <PropertyColumn Property="x => x.Title" />
-            <PropertyColumn Property="x => x.Description" />
-            <PropertyColumn Property="x => x.ApplyUrl" />
-            <PropertyColumn Property="x => x.Pay" />
-            <PropertyColumn Property="x => x.DatePosted" />
-        </Columns>
-    </MudDataGrid>
-}
+    @if (_jobListings != null && _jobListings.Count > 0)
+    {
+        <MudDataGrid T="Job" Items="@_jobListings" RowClick="@OnRowClick" Hover="true">
+            <Columns>
+                <PropertyColumn Property="x => x.Title"/>
+                <PropertyColumn Property="x => x.Description"/>
+                <PropertyColumn Property="x => x.ApplyUrl"/>
+                <PropertyColumn Property="x => x.Pay"/>
+                <PropertyColumn Property="x => x.DatePosted"/>
+            </Columns>
+        </MudDataGrid>
+    }
+</MudStack>
 
 @code {
     private string? _infoMessage;
     
     private string _keywordText = "";
-    private bool _usePostedAfter = false;
-    private DateTime _postedAfter = DateTime.Now;
+    private bool _usePostedAfter;
+    private DateTime? _postedAfter = DateTime.Now;
 
     private List<Job>? _jobListings;
 
@@ -57,5 +58,10 @@
         
         if (_jobListings.Count == 0)
             _infoMessage = "No results matched your search terms.";
+    }
+
+    private void OnRowClick(DataGridRowClickEventArgs<Job> obj)
+    {
+        NavManager.NavigateTo($"/jobs/details?jobid={obj.Item.JobId}");
     }
 }
