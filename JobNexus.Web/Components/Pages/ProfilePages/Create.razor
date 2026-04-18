@@ -1,9 +1,7 @@
 @page "/profiles/create"
-@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
 @using JobNexus.Web.ViewModels
-@using Microsoft.AspNetCore.Authorization
 @inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -70,7 +68,8 @@
 
         var profile = new Profile
         {
-            UserName = ProfileModel.Username,
+            Username = ProfileModel.Username,
+            Password = ProfileModel.Password,
             Email = ProfileModel.Email,
             Name = ProfileModel.Name,
             Bio = ProfileModel.Bio,

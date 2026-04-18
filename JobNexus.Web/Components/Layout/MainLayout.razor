@@ -1,9 +1,4 @@
-﻿@using JobNexus.Core.Models
-@using JobNexus.Services
-@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Identity
-@inherits LayoutComponentBase
-@inject CurrentUserService CurrentUser
+﻿@inherits LayoutComponentBase
 
 <div class="page">
     <div class="sidebar">
@@ -12,15 +7,7 @@
 
     <main>
         <div class="top-row px-4">
-            <AuthorizeView>
-                <Authorized>
-                    Welcome, @profile?.Name |
-                    <a href="/logout">Log Out</a>
-                </Authorized>
-                <NotAuthorized>
-                    <a href="/login">Log In</a>
-                </NotAuthorized>
-            </AuthorizeView>
+            <a href="/login" >Log In</a>
         </div>
 
         <article class="content px-4">
@@ -45,14 +32,3 @@
 @* Needed for snackbars *@
 <MudSnackbarProvider />
 
-
-@code {
-
-    private Profile? profile;
-
-    protected override async Task OnInitializedAsync()
-    {
-        profile = await CurrentUser.GetProfileAsync();
-    }
-
-}

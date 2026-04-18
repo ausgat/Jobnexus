@@ -1,54 +1,88 @@
 @page "/profiles/details"
-@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
-@using Microsoft.AspNetCore.Authorization
-@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
+@using JobNexus.Web.Components.Shared
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Profile Details</PageTitle>
 
-<h1>Details</h1>
-
-<div>
-    <h2>Profile</h2>
-    <hr />
-    @if (profile is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Username</dt>
-            <dd class="col-sm-10">@profile.UserName</dd>
-            <dt class="col-sm-2">Email</dt>
-            <dd class="col-sm-10">@profile.Email</dd>
-            <dt class="col-sm-2">Name</dt>
-            <dd class="col-sm-10">@profile.Name</dd>
-            <dt class="col-sm-2">Bio</dt>
-            <dd class="col-sm-10">@profile.Bio</dd>
-            <dt class="col-sm-2">Location</dt>
-            <dd class="col-sm-10">@profile.Location</dd>
-        </dl>
-        <div>
-            <a href="@($"/profiles/edit?username={profile.UserName}")">Edit</a> |
-            <a href="@($"/profiles")">Back to List</a>
-        </div>
-    }
+<h2>Profile Details</h2>
+<div class="pb-4">
+    <MudLink Href="@($"/profiles")" StartIcon="@Icons.Material.Filled.ArrowLeft">Back to Profiles</MudLink>
 </div>
+@if (_profile is null)
+{
+    <p><em>Loading...</em></p>
+}
+else {
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Color="Color.Secondary">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default"/>
+                </MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1">@_profile.Name</MudText>
+                <MudText Typo="Typo.body2">@@@_profile.Username</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudTooltip Text="Edit Profile">
+                    <MudIconButton
+                        Icon="@Icons.Material.Filled.Edit"
+                        Color="Color.Default"
+                        Href="@($"/profiles/edit?username={_profile.Username}")"/>
+                </MudTooltip>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSimpleTable Elevation="0">
+                        <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <td>@_profile.Name</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>@_profile.Email</td>
+                        </tr>
+                        <tr>
+                            <th>Bio</th>
+                            <td>@_profile.Bio</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>@_profile.Location</td>
+                        </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudItem>
+                <MudItem xs="6">
+                    <CertificationList Username="@Username" />
+                </MudItem>
+                <MudItem xs="6">
+                    <SkillList Username="@Username" />
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+}
 
 @code {
-    private Profile? profile;
+    private Profile? _profile;
 
     [SupplyParameterFromQuery]
-    private string Username { get; set; }
+    private string? Username { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        profile = await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _profile = await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
 
-        if (profile is null)
+        if (_profile is null)
         {
             NavigationManager.NavigateTo("notfound");
         }
