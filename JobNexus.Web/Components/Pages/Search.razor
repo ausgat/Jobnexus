@@ -1,0 +1,61 @@
+@page "/search"
+@using JobNexus.Core.Models
+@using JobNexus.Core.Search
+@using JobNexus.Services
+@inject SearchService SearchService
+<PageTitle>Search</PageTitle>
+
+<div class="btn-toolbar" role="toolbar">
+    <InputText @bind-Value="_keywordText" class="me-2" placeholder="Keywords&hellip;" />
+    <div class="input-group me-2" role="group">
+        <span class="input-group-text" id="posted-after">
+            <InputCheckbox @bind-Value="_usePostedAfter"/> Posted after
+        </span>
+        <InputDate class="input-group-text" aria-describedby="posted-after" @bind-Value="_postedAfter"/>
+    </div>
+    <button type="button" class="btn btn-primary" @onclick="HandleSearch">Search</button>
+</div>
+
+@if (!string.IsNullOrEmpty(_infoMessage))
+{
+    <p>@_infoMessage</p>
+}
+
+@if (_jobListings != null)
+{
+    <MudDataGrid Items="@_jobListings">
+        <Columns>
+            <PropertyColumn Property="x => x.Title" />
+            <PropertyColumn Property="x => x.Description" />
+            <PropertyColumn Property="x => x.ApplyUrl" />
+            <PropertyColumn Property="x => x.Pay" />
+            <PropertyColumn Property="x => x.DatePosted" />
+        </Columns>
+    </MudDataGrid>
+}
+
+@code {
+    private string? _infoMessage;
+    
+    private string _keywordText = "";
+    private bool _usePostedAfter = false;
+    private DateTime _postedAfter = DateTime.Now;
+
+    private List<Job>? _jobListings;
+
+    private async Task HandleSearch()
+    {
+        _infoMessage = "";
+        
+        var query = new SearchQuery
+        {
+            Keywords = _keywordText.Split(' ').ToList()
+        };
+        if (_usePostedAfter)
+            query.DatePostedAfter = _postedAfter;
+        _jobListings = await SearchService.SearchAsync(query);
+        
+        if (_jobListings.Count == 0)
+            _infoMessage = "No results matched your search terms.";
+    }
+}
