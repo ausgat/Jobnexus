@@ -22,6 +22,11 @@
 
         <MudGrid Spacing="3">
 
+            <!-- Salary slider -->
+            <MudSlider @bind-Value="minSalary" Min="15000" Max="200000" TickMarks="true" Step="5000" Color="Color.Info">Minimum salary: @minSalary.ToString("C2")</MudSlider>
+            <MudSlider @bind-Value="maxSalary" Min="15000" Max="200000" TickMarks="true" Step="5000" Color="Color.Info">Maximum salary: @maxSalary.ToString("C2")</MudSlider>
+
+
             <!-- Keywords -->
             <MudItem xs="12" md="5">
                 <MudTextField T="string"
@@ -31,7 +36,19 @@
                               @bind-Value="_keywordText"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
-                              AdornmentColor="Color.Primary" />
+                              AdornmentColor="Color.Primary"/>
+            </MudItem>
+
+            <!-- Company -->
+            <MudItem xs="12" md="5">
+                <MudTextField T="string"
+                              Label="Company"
+                              Placeholder="Company name"
+                              Variant="Variant.Outlined"
+                              @bind-Value="_companyText"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              AdornmentColor="Color.Primary"/>
             </MudItem>
 
             <!-- Employment Type -->
@@ -45,7 +62,7 @@
                                  Variant="@(_employmentLevel == type ? Variant.Filled : Variant.Outlined)"
                                  Color="@(_employmentLevel == type ? Color.Primary : Color.Default)"
                                  OnClick="@(() => SetEmployment(type))"
-                                 Style="cursor:pointer; font-weight:500;" />
+                                 Style="cursor:pointer; font-weight:500;"/>
                     }
                 </div>
             </MudItem>
@@ -53,21 +70,24 @@
             <!-- Posted After + Search Button -->
             <MudItem xs="12" md="2" Class="d-flex flex-column justify-end">
                 <div class="d-flex align-center mb-2">
-                    <MudCheckBox @bind-Value="_usePostedAfter" Label="Posted after" Color="Color.Primary" />
+                    <MudCheckBox @bind-Value="_usePostedAfter" Label="Posted after" Color="Color.Primary"/>
                 </div>
                 @if (_usePostedAfter)
                 {
                     <MudDatePicker @bind-Date="_postedAfter"
                                    Variant="Variant.Outlined"
-                                   Class="mb-2" />
+                                   Class="mb-2"/>
                 }
+            </MudItem>
+
+            <MudItem xs="12" md="2" Class="d-flex flex-column justify-end">
                 <MudButton Variant="Variant.Filled"
                            Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
                            FullWidth="true"
                            OnClick="HandleSearch">
                     Search
                 </MudButton>
-            </MudItem>
+                </MudItem>
 
         </MudGrid>
 
@@ -159,9 +179,13 @@
     private string? QueryKeyword { get; set; }
 
     private string _keywordText = "";
+    private string _companyText = "";
     private string _employmentLevel = "";
     private bool _usePostedAfter;
     private DateTime? _postedAfter = DateTime.Now;
+    
+    public int minSalary = 15000;
+    public int maxSalary = 200000;
 
     private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
 
@@ -182,6 +206,7 @@
         var searchQuery = new SearchQuery
         {
             Keywords = _keywordText.Split(" ", options: StringSplitOptions.TrimEntries).ToList(),
+            Company = _companyText,
             EmploymentType = ToEmploymentType(_employmentLevel),
             ResultsPerPage = 12,
             PageNumber = 1
