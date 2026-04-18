@@ -1,36 +1,101 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">JobNexus</a>
-    </div>
-</div>
+﻿@inherits LayoutComponentBase
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<MudThemeProvider Theme="_darkTheme">
+<MudLayout Style="background-color:#121212;">
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="me">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> My Profile
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="search">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Search Listings
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="profiles">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Profiles
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    <!-- Top Bar -->
+    <MudAppBar Elevation="2"
+               Style="background-color:#1e1e1e; border-bottom:1px solid #ff6a00;">
 
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@ToggleDrawer" />
+
+        <MudText Typo="Typo.h6" Class="ms-2" Style="color:white; font-weight:600;">
+            JobNexus
+        </MudText>
+    </MudAppBar>
+
+    <!-- Sidebar -->
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Elevation="2"
+               Style="background-color:#1e1e1e; color:white;">
+
+        <MudNavMenu Class="pa-2">
+
+            <MudNavLink Href="/" Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Home"
+                        Class="nav-item-custom">
+                Dashboard
+            </MudNavLink>
+
+            <MudNavLink Href="/me"
+                        Icon="@Icons.Material.Filled.Person"
+                        Class="nav-item-custom">
+                My Profile
+            </MudNavLink>
+
+            <MudNavLink Href="/search"
+                        Icon="@Icons.Material.Filled.Search"
+                        Class="nav-item-custom">
+                Search Listings
+            </MudNavLink>
+
+            <MudNavLink Href="/profiles"
+                        Icon="@Icons.Material.Filled.Group"
+                        Class="nav-item-custom">
+                Profiles
+            </MudNavLink>
+
+        </MudNavMenu>
+
+    </MudDrawer>
+
+    <!-- Main Content -->
+    <MudMainContent Class="pa-6" Style="background-color:#121212;">
+        @Body
+    </MudMainContent>
+
+</MudLayout>
+</MudThemeProvider>
+
+<style>
+    .nav-item-custom {
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 6px;
+    }
+
+    .nav-item-custom:hover {
+        background-color: #2a2a2a;
+    }
+
+    .nav-item-custom.active {
+        background-color: #ff6a00 !important;
+        color: white !important;
+    }
+</style>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private MudTheme _darkTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()        {
+            Background = "#121212",
+            Surface = "#1e1e1e",
+            Primary = "#ff6a00",
+            Secondary = "#ff6a00",
+            AppbarBackground = "#1e1e1e",
+            DrawerBackground = "#1e1e1e",
+            TextPrimary = "#ffffff"
+        }
+    };
+}
