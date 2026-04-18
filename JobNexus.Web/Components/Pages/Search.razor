@@ -31,7 +31,7 @@
             <MudItem xs="12" md="5">
                 <MudTextField T="string"
                               Label="Keywords"
-                              Placeholder="Job title, skills, company..."
+                              Placeholder="Enter keywords"
                               Variant="Variant.Outlined"
                               @bind-Value="_keywordText"
                               Adornment="Adornment.Start"
@@ -43,7 +43,7 @@
             <MudItem xs="12" md="5">
                 <MudTextField T="string"
                               Label="Company"
-                              Placeholder="Company name"
+                              Placeholder="Enter company name"
                               Variant="Variant.Outlined"
                               @bind-Value="_companyText"
                               Adornment="Adornment.Start"
@@ -87,7 +87,7 @@
                            OnClick="HandleSearch">
                     Search
                 </MudButton>
-                </MudItem>
+            </MudItem>
 
         </MudGrid>
 
@@ -172,6 +172,14 @@
         </MudGrid>
     }
 
+    <!-- Pagination -->
+    @if (_searchResults != null){
+        <div class="d-flex flex-column align-center justify-center" style="padding:30px 0;">
+            <MudPagination Align="Align.Center" Color="Color.Primary" Count="_searchResults.PageCount" @bind-Selected="@_selected"/>
+            <MudText Align="Align.Center">Showing @_searchResults.Count out of @_searchResults.TotalCount results.</MudText>
+        </div>
+    }
+
 </MudContainer>
 
 @code {
@@ -183,6 +191,8 @@
     private string _employmentLevel = "";
     private bool _usePostedAfter;
     private DateTime? _postedAfter = DateTime.Now;
+    
+    private int _selected = 1;
     
     public int minSalary = 15000;
     public int maxSalary = 200000;
@@ -209,7 +219,9 @@
             Company = _companyText,
             EmploymentType = ToEmploymentType(_employmentLevel),
             ResultsPerPage = 12,
-            PageNumber = 1
+            PageNumber = 1,
+            MaxPay = maxSalary,
+            MinPay = minSalary
         };
         if (_usePostedAfter)
         {
