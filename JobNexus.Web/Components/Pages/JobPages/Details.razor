@@ -1,6 +1,8 @@
 @page "/jobs/details"
+@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Authorization
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 

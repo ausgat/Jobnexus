@@ -18,7 +18,7 @@
                     U
                 </MudAvatar>
                 <div>
-                    <MudText Style="color:white; font-weight:600;">@_profile.Username</MudText>
+                    <MudText Style="color:white; font-weight:600;">@_profile.UserName</MudText>
                     <MudText Style="color:#aaa; font-size:0.8rem;">@_profile.Email</MudText>
                 </div>
             </div>
@@ -46,14 +46,14 @@
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Primary"
                            Size="Size.Small"
-                           Href="@($"/profiles/details?username={@_profile.Username}")"
+                           Href="@($"/profiles/details?username={@_profile.UserName}")"
                            FullWidth="true">
                     View
                 </MudButton>
                 <MudButton Variant="Variant.Filled"
                            Style="background:#ff6a00; color:white; font-weight:600;"
                            Size="Size.Small"
-                           Href="@($"/profiles/edit?username={@_profile.Username}")"
+                           Href="@($"/profiles/edit?username={@_profile.UserName}")"
                            FullWidth="true">
                     Edit
                 </MudButton>

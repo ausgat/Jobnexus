@@ -1,7 +1,9 @@
 @page "/me"
+@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
 @using JobNexus.Web.Components.Shared
+@using Microsoft.AspNetCore.Authorization
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -26,14 +28,14 @@ else {
             </CardHeaderAvatar>
             <CardHeaderContent>
                 <MudText Typo="Typo.body1">@_profile.Name</MudText>
-                <MudText Typo="Typo.body2">@@@_profile.Username</MudText>
+                <MudText Typo="Typo.body2">@@@_profile.UserName</MudText>
             </CardHeaderContent>
             <CardHeaderActions>
                 <MudTooltip Text="Edit Profile">
                     <MudIconButton
                         Icon="@Icons.Material.Filled.Edit"
                         Color="Color.Default"
-                        Href="@($"/profiles/edit?username={_profile.Username}")"/>
+                        Href="@($"/profiles/edit?username={_profile.UserName}")"/>
                 </MudTooltip>
             </CardHeaderActions>
         </MudCardHeader>
@@ -62,10 +64,10 @@ else {
                     </MudSimpleTable>
                 </MudItem>
                 <MudItem xs="6">
-                    <CertificationList Username="@_profile.Username" />
+                    <CertificationList Username="@_profile.UserName" />
                 </MudItem>
                 <MudItem xs="6">
-                    <SkillList Username="@_profile.Username" />
+                    <SkillList Username="@_profile.UserName" />
                 </MudItem>
             </MudGrid>
         </MudCardContent>

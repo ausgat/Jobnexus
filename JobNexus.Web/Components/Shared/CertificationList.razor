@@ -54,7 +54,7 @@
     {
         await using var context = await DbFactory.CreateDbContextAsync();
         var profile = await context.Profiles.Include("Certifications")
-            .FirstOrDefaultAsync(m => m.Username == Username);
+            .FirstOrDefaultAsync(m => m.UserName == Username);
 
         if (profile is not null)
         {
@@ -73,7 +73,7 @@
     private async Task AddCert()
     {
         await using var context = await DbFactory.CreateDbContextAsync();
-        var profile = await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
+        var profile = await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
 
         if (profile is not null && !string.IsNullOrWhiteSpace(_certFormText))
         {
@@ -90,7 +90,7 @@
         await using var context = await DbFactory.CreateDbContextAsync();
         var profile = await context.Profiles
             .Include(profile => profile.Certifications)
-            .FirstOrDefaultAsync(m => m.Username == Username);
+            .FirstOrDefaultAsync(m => m.UserName == Username);
 
         if (profile is not null)
         {
