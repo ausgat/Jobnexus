@@ -2,10 +2,13 @@ using JobNexus.Core.Models;
 using JobNexus.Web.Components;
 using JobNexus.Data;
 using Microsoft.EntityFrameworkCore;
-using JobNexus.Services; //new thing
+using JobNexus.Services;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Razor pages
+builder.Services.AddRazorPages();
 
 builder.Services.AddMudServices();
 
@@ -19,6 +22,22 @@ var configString = builder.Configuration.GetConnectionString("JobNexusDatabase")
 builder.Services.AddDbContextFactory<JobNexusContext>(options =>
     options.UseMySql(configString, serverVersion: ServerVersion.AutoDetect(configString)));
 
+// Needed for identity service
+builder.Services.AddDbContextFactory<JobNexusContext>(options =>
+    options.UseMySql(configString, serverVersion: ServerVersion.AutoDetect(configString)));
+
+builder.Services.AddDefaultIdentity<Profile>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<JobNexusContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/accessdenied";
+});
+
+builder.Services.AddScoped<CurrentUserService>();
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddHostedService<JobSyncService>();
 builder.Services.AddScoped<SearchService>();
@@ -31,15 +50,21 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    app.UseMigrationsEndPoint();
 }
 
+app.UseMigrationsEndPoint();
 app.UseHttpsRedirection();
 app.UseStatusCodePagesWithReExecute("/notfound", createScopeForStatusCodePages: true);
+
+app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapRazorPages();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

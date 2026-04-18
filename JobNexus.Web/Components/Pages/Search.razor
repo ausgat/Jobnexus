@@ -1,5 +1,8 @@
 @page "/search"
+@attribute [Authorize]
 @using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Authorization
+<PageTitle>Search</PageTitle>
 @using JobNexus.Core.Search
 @using JobNexus.Services
 @using Microsoft.EntityFrameworkCore
