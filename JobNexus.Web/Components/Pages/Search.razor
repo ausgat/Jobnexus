@@ -74,14 +74,14 @@
     </MudPaper>
 
     <!-- Results -->
-    @if (_jobListings == null)
+    @if (_searchResults == null)
     {
         <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
             <MudIcon Icon="@Icons.Material.Filled.SearchOff" Style="color:#444; font-size:4rem;" Class="mb-3" />
             <MudText Typo="Typo.h6" Style="color:#666;">Enter keywords and hit Search to find jobs</MudText>
         </div>
     }
-    else if (_jobListings.Count == 0)
+    else if (_searchResults.TotalCount == 0)
     {
         <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
             <MudIcon Icon="@Icons.Material.Filled.Inbox" Style="color:#444; font-size:4rem;" Class="mb-3" />
@@ -90,10 +90,10 @@
     }
     else
     {
-        <MudText Style="color:#888; font-size:0.85rem;" Class="mb-3">@_jobListings.Count result(s) found</MudText>
+        <MudText Style="color:#888; font-size:0.85rem;" Class="mb-3">@_searchResults.TotalCount result(s) found</MudText>
         <MudGrid Spacing="3">
 
-            @foreach (var job in _jobListings)
+            @foreach (var job in _searchResults.Jobs)
             {
                 <MudItem xs="12" md="6" lg="4">
 
@@ -160,19 +160,19 @@
 
     private string _keywordText = "";
     private string _employmentLevel = "";
-    private bool _usePostedAfter = false;
+    private bool _usePostedAfter;
     private DateTime? _postedAfter = DateTime.Now;
 
     private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
 
-    private List<Job>? _jobListings;
+    private SearchResults? _searchResults;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(QueryKeyword))
         {
             _keywordText = QueryKeyword;
-            HandleSearch();
+            await HandleSearch();
         }
     }
 
@@ -182,8 +182,27 @@
         var searchQuery = new SearchQuery
         {
             Keywords = _keywordText.Split(" ", options: StringSplitOptions.TrimEntries).ToList(),
+            EmploymentType = ToEmploymentType(_employmentLevel),
+            ResultsPerPage = 12,
+            PageNumber = 1
         };
-        _jobListings = await SearchService.SearchAsync(searchQuery);
+        if (_usePostedAfter)
+        {
+            searchQuery.DatePostedAfter = _postedAfter;
+        }
+        _searchResults = await SearchService.SearchAsync(searchQuery);
+    }
+    
+    private EmploymentType? ToEmploymentType(string typeStr)
+    {
+        return typeStr switch
+        {
+            "Full-time" => EmploymentType.FullTime,
+            "Part-time" => EmploymentType.PartTime,
+            "Internship" => EmploymentType.Internship,
+            "Temporary" => EmploymentType.Temporary,
+            _ => null
+        };
     }
 
     private void SetEmployment(string type)

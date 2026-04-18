@@ -50,7 +50,7 @@ public class SearchTest : DbTestBase
         var results = await search.SearchAsync(new SearchQuery());
 
         // Get the IDs of the job listing results (comparing objects doesn't work; you must use IDs)
-        var resultIds = results.Select(j => j.JobId).ToList();
+        var resultIds = results.Jobs.Select(j => j.JobId).ToList();
 
         // Make sure we're returning the right results
         Assert.Equal(3, resultIds.Count);
@@ -60,7 +60,7 @@ public class SearchTest : DbTestBase
 
         // Perform more tests with a search for the "software" keyword
         results = await search.SearchAsync(new SearchQuery{Keywords = ["software"]});
-        resultIds = results.Select(j => j.JobId).ToList();
+        resultIds = results.Jobs.Select(j => j.JobId).ToList();
         
         // Make sure we're only getting the software engineer job
         Assert.Single(resultIds);
@@ -95,12 +95,12 @@ public class SearchTest : DbTestBase
 
         // Search for jobs belonging to Apple
         var results = await search.SearchAsync(new SearchQuery{Company = "Apple"});
-        Assert.Contains(job1, results);
-        Assert.DoesNotContain(job2, results);
+        Assert.Contains(job1, results.Jobs);
+        Assert.DoesNotContain(job2, results.Jobs);
         
         // Search for jobs belonging to Microsoft
         results = await search.SearchAsync(new SearchQuery{Company = "Microsoft"});
-        Assert.Contains(job2, results);
-        Assert.DoesNotContain(job1, results);
+        Assert.Contains(job2, results.Jobs);
+        Assert.DoesNotContain(job1, results.Jobs);
     }
 }

@@ -16,26 +16,65 @@ public class SearchService(IDbContextFactory<JobNexusContext> contextFactory)
     /// <summary>
     /// Perform an asynchronous search.
     /// </summary>
-    /// <param name="query">SearchQuery object for keywords and filtering</param>
+    /// <param name="searchQuery">SearchQuery object for keywords and filtering</param>
     /// <returns>A list of Job objects retrieved from the database</returns>
-    public async Task<List<Job>> SearchAsync(SearchQuery query)
+    public async Task<SearchResults> SearchAsync(SearchQuery searchQuery)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        var predicate = PredicateBuilder.New<Job>();
-        foreach (var k in query.Keywords)
+        var keywordPredicate = PredicateBuilder.New<Job>();
+        foreach (var k in searchQuery.Keywords)
         {
-            predicate = predicate.Or(j =>
+            keywordPredicate = keywordPredicate.Or(j =>
                 j.Title != null && j.Title.ToLower().Contains(k.ToLower()));
-            predicate = predicate.Or(j =>
+            keywordPredicate = keywordPredicate.Or(j =>
                 j.Description != null && j.Description.ToLower().Contains(k.ToLower()));
         }
         
-        var results = context.Jobs.AsExpandable()
-            .Where(predicate)
-            .Where(j => query.DatePostedAfter == null || j.DatePosted >= query.DatePostedAfter)
+        // Just add keywords for employment type since we don't have a specific property in the database
+        List<string> employmentKeywords = [""];
+        switch (searchQuery.EmploymentType)
+        {
+            case EmploymentType.FullTime:
+                employmentKeywords = ["fulltime", "full-time", "full time"];
+                break;
+            case EmploymentType.PartTime:
+                employmentKeywords = ["parttime", "part-time", "part time"];
+                break;
+            case EmploymentType.Internship:
+                employmentKeywords = ["internship"];
+                break;
+            case EmploymentType.Temporary:
+                employmentKeywords = ["temporary"];
+                break;
+        }
+        var employmentPredicate = PredicateBuilder.New<Job>();
+        foreach (var k in employmentKeywords)
+        {
+            employmentPredicate = employmentPredicate.Or(j =>
+                j.Title != null && j.Title.ToLower().Contains(k.ToLower()));
+            employmentPredicate = employmentPredicate.Or(j =>
+                j.Description != null && j.Description.ToLower().Contains(k.ToLower()));
+        }
+
+        var baseQuery = context.Jobs.Include(j => j.Company).AsExpandable()
+            .Where(keywordPredicate)
+            .Where(employmentPredicate) // Require employment keywords to be found (AND)
+            .Where(j => searchQuery.Company == null
+                        || (j.Company != null && j.Company.CompanyName!
+                            .Contains(searchQuery.Company, StringComparison.InvariantCultureIgnoreCase)))
+            .Where(j => searchQuery.DatePostedAfter == null || j.DatePosted >= searchQuery.DatePostedAfter)
+            .Where(j => searchQuery.MinPay == null || j.Pay >= searchQuery.MinPay)
+            .Where(j => searchQuery.MaxPay == null || j.Pay <= searchQuery.MinPay);
+        var countQuery = await baseQuery.CountAsync();
+        var paginatedQuery = await baseQuery
             .OrderByDescending(j => j.DatePosted)
-            .ToList();
-        return results;
+            .Skip(Math.Min((searchQuery.PageNumber - 1) * searchQuery.ResultsPerPage, 0))
+            .Take(searchQuery.ResultsPerPage)
+            .ToListAsync();        
+
+        var searchResults = new SearchResults(paginatedQuery, searchQuery.ResultsPerPage, countQuery);
+
+        return searchResults;
     }
 }
