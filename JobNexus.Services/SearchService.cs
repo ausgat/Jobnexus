@@ -61,11 +61,11 @@ public class SearchService(IDbContextFactory<JobNexusContext> contextFactory)
             .Where(keywordPredicate)
             .Where(employmentPredicate) // Require employment keywords to be found (AND)
             .Where(j => searchQuery.Company == null
-                        || (j.Company != null && j.Company.CompanyName!
-                            .Contains(searchQuery.Company, StringComparison.InvariantCultureIgnoreCase)))
+                        || (j.Company != null && j.Company.CompanyName!.ToLower()
+                            .Contains(searchQuery.Company.ToLower())))
             .Where(j => searchQuery.DatePostedAfter == null || j.DatePosted >= searchQuery.DatePostedAfter)
             .Where(j => searchQuery.MinPay == null || j.Pay >= searchQuery.MinPay)
-            .Where(j => searchQuery.MaxPay == null || j.Pay <= searchQuery.MinPay);
+            .Where(j => searchQuery.MaxPay == null || j.Pay <= searchQuery.MaxPay);
         var countQuery = await baseQuery.CountAsync();
         var paginatedQuery = await baseQuery
             .OrderByDescending(j => j.DatePosted)
