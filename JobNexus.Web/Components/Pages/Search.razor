@@ -1,6 +1,10 @@
 @page "/search"
 @using JobNexus.Core.Models
-@using MudBlazor
+@using JobNexus.Core.Search
+@using JobNexus.Services
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+@inject SearchService SearchService
 
 <PageTitle>Search Jobs — JobNexus</PageTitle>
 
@@ -171,14 +175,14 @@
         }
     }
 
-    private void HandleSearch()
+    private async Task HandleSearch()
     {
-        _jobListings = new List<Job>
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var searchQuery = new SearchQuery
         {
-            new Job { Title = "Software Engineer", Description = "Build and maintain scalable web applications using modern frameworks.", Pay = 100, DatePosted = DateTime.Now },
-            new Job { Title = "Web Developer", Description = "Design and develop responsive websites and user interfaces.", Pay = 80, DatePosted = DateTime.Now.AddDays(-3) },
-            new Job { Title = "Data Analyst", Description = "Analyze business data and produce actionable insights from large datasets.", Pay = 90, DatePosted = DateTime.Now.AddDays(-7) }
+            Keywords = _keywordText.Split(" ", options: StringSplitOptions.TrimEntries).ToList(),
         };
+        _jobListings = await SearchService.SearchAsync(searchQuery);
     }
 
     private void SetEmployment(string type)

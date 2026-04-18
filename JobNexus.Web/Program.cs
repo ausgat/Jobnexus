@@ -19,8 +19,6 @@ var configString = builder.Configuration.GetConnectionString("JobNexusDatabase")
 builder.Services.AddDbContextFactory<JobNexusContext>(options =>
     options.UseMySql(configString, serverVersion: ServerVersion.AutoDetect(configString)));
 
-builder.Services.AddQuickGridEntityFrameworkAdapter();
-
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddHostedService<JobSyncService>();
 builder.Services.AddScoped<SearchService>();

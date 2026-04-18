@@ -1,7 +1,7 @@
 @page "/profiles/details"
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
-@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
 <PageTitle>Profile Details — JobNexus</PageTitle>
@@ -93,7 +93,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
+        await using var context = await DbFactory.CreateDbContextAsync();
         profile = await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
 
         if (profile is null)
