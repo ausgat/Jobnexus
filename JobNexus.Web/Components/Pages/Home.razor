@@ -1,7 +1,247 @@
-﻿@page "/"
+@page "/"
+@inject NavigationManager NavigationManager
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard — JobNexus</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
 
-Welcome to your new app.
+    <!-- Welcome Header -->
+    <div class="d-flex justify-space-between align-center mb-6 flex-wrap gap-3">
+        <div>
+            <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">Welcome back!</MudText>
+            <MudText Style="color:#999; margin-top:4px;">Here's what's happening with your job search.</MudText>
+        </div>
+        <MudButton Variant="Variant.Filled"
+                   Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                   StartIcon="@Icons.Material.Filled.Search"
+                   OnClick="@(() => NavigationManager.NavigateTo("/search"))">
+            Find Jobs
+        </MudButton>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <MudGrid Spacing="4">
+
+        <!-- New Job Postings -->
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+                <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Newspaper" Style="color:#ff6a00;" />
+                    <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">New Job Postings</MudText>
+                </div>
+
+                <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">Software Intern</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">Acme Corp · Remote</MudText>
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$25/hr</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">New</MudChip>
+                        </div>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">Web Developer</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">TechStart · Hybrid</MudText>
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$30/hr</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">New</MudChip>
+                        </div>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">DevOps Engineer</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">CloudWave · On-site</MudText>
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$45/hr</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">New</MudChip>
+                        </div>
+                    </MudPaper>
+
+                </div>
+
+            </MudPaper>
+        </MudItem>
+
+        <!-- Saved Jobs -->
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+                <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Bookmark" Style="color:#ff6a00;" />
+                    <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">Saved Jobs</MudText>
+                </div>
+
+                <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">Backend Developer</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">DataFlow Inc · Remote</MudText>
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$28/hr</MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Style="background:#ff6a00; color:white; font-weight:600;"
+                                       Size="Size.Small">
+                                Apply
+                            </MudButton>
+                        </div>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">Mobile Developer</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">AppNova · Hybrid</MudText>
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$35/hr</MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Style="background:#ff6a00; color:white; font-weight:600;"
+                                       Size="Size.Small">
+                                Apply
+                            </MudButton>
+                        </div>
+                    </MudPaper>
+
+                </div>
+
+            </MudPaper>
+        </MudItem>
+
+        <!-- Applications -->
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+                <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Send" Style="color:#ff6a00;" />
+                    <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">Applications</MudText>
+                </div>
+
+                <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">Frontend Developer</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">Google · Remote</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Open</MudChip>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">UI Designer</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">Meta · On-site</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Filled">Rejected</MudChip>
+                    </MudPaper>
+
+                    <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                        <MudText Style="color:white; font-weight:600; font-size:0.95rem;">Systems Analyst</MudText>
+                        <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">IBM · Hybrid</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">Pending</MudChip>
+                    </MudPaper>
+
+                </div>
+
+            </MudPaper>
+        </MudItem>
+
+        <!-- Profile Summary -->
+        <MudItem xs="12" sm="6" lg="3">
+            <MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+                <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Style="color:#ff6a00;" />
+                    <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">Your Profile</MudText>
+                </div>
+
+                <div style="padding:16px; color:white; display:flex; flex-direction:column; gap:10px;">
+
+                    <div class="d-flex align-center gap-3 mb-2">
+                        <MudAvatar Size="Size.Large" Style="background:#ff6a00; color:white; font-weight:700;">
+                            U
+                        </MudAvatar>
+                        <div>
+                            <MudText Style="color:white; font-weight:600;">Username</MudText>
+                            <MudText Style="color:#aaa; font-size:0.8rem;">user@email.com</MudText>
+                        </div>
+                    </div>
+
+                    <MudDivider Style="border-color:#333;" />
+
+                    <div class="d-flex flex-column gap-1">
+                        <div class="d-flex justify-space-between">
+                            <MudText Style="color:#888; font-size:0.85rem;">Status</MudText>
+                            <MudText Style="color:#ccc; font-size:0.85rem;">Student</MudText>
+                        </div>
+                        <div class="d-flex justify-space-between">
+                            <MudText Style="color:#888; font-size:0.85rem;">Degree</MudText>
+                            <MudText Style="color:#ccc; font-size:0.85rem;">Computer Science</MudText>
+                        </div>
+                        <div class="d-flex justify-space-between">
+                            <MudText Style="color:#888; font-size:0.85rem;">Location</MudText>
+                            <MudText Style="color:#ccc; font-size:0.85rem;">Not set</MudText>
+                        </div>
+                    </div>
+
+                    <MudDivider Style="border-color:#333;" />
+
+                    <div class="d-flex gap-2 mt-1">
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   Size="Size.Small"
+                                   Href="/profiles"
+                                   FullWidth="true">
+                            View
+                        </MudButton>
+                        <MudButton Variant="Variant.Filled"
+                                   Style="background:#ff6a00; color:white; font-weight:600;"
+                                   Size="Size.Small"
+                                   Href="/profiles/edit"
+                                   FullWidth="true">
+                            Edit
+                        </MudButton>
+                    </div>
+
+                </div>
+
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+
+    <!-- Quick Search Bar -->
+    <div class="d-flex justify-center mt-8">
+        <MudPaper Elevation="3"
+                  Class="pa-2 d-flex align-center"
+                  Style="width:min(700px, 100%); background:#1e1e1e; border-radius:40px; border:1px solid #333;">
+
+            <MudTextField T="string"
+                          @bind-Value="_homeSearch"
+                          Placeholder="Quick search — press Enter or click Go"
+                          Variant="Variant.Text"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          AdornmentColor="Color.Primary"
+                          Class="flex-grow-1 ms-1"
+                          Style="color:white;"
+                          OnKeyDown="HandleSearchKeyDown" />
+
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowForward"
+                           Style="background:#ff6a00; color:white; border-radius:50%; margin:4px;"
+                           OnClick="GoToSearch" />
+        </MudPaper>
+    </div>
+
+</MudContainer>
+
+@code {
+    private string _homeSearch = "";
+
+    private void GoToSearch()
+    {
+        var query = Uri.EscapeDataString(_homeSearch.Trim());
+        NavigationManager.NavigateTo(string.IsNullOrEmpty(query) ? "/search" : $"/search?q={query}");
+    }
+
+    private void HandleSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            GoToSearch();
+    }
+}

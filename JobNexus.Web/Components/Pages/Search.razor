@@ -1,83 +1,198 @@
 @page "/search"
 @using JobNexus.Core.Models
-<PageTitle>Search</PageTitle>
+@using MudBlazor
 
-<div class="btn-toolbar" role="toolbar">
-    <InputText @bind-Value="_keywordText" class="me-2" placeholder="Keywords&hellip;" />
-    <div class="btn-group me-2" role="group">
-        <InputSelect @bind-Value="_employmentLevel" class="btn btn-primary">
-            <option value="">Employment Level</option>
-            <option value="ft">Full-time</option>
-            <option value="pt">Part-time</option>
-            <option value="tmp">Temporary</option>
-            <option value="int">Internship</option>
-        </InputSelect>
-    </div>
-    <div class="input-group me-2" role="group">
-        <span class="input-group-text" id="posted-after">
-            <InputCheckbox @bind-Value="_usePostedAfter"/> Posted after
-        </span>
-        <InputDate class="input-group-text" aria-describedby="posted-after" @bind-Value="_postedAfter"/>
-    </div>
-    <button type="button" class="btn btn-primary" @onclick="HandleSearch">Search</button>
-</div>
+<PageTitle>Search Jobs — JobNexus</PageTitle>
 
-<p>
-    Current options:
-    @_employmentLevel,
-    @if (_usePostedAfter) {
-        <text>Posted after @_postedAfter</text>
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+
+    <!-- Page Header -->
+    <div class="mb-6">
+        <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">Search Jobs</MudText>
+        <MudText Style="color:#999; margin-top:4px;">Find your next opportunity</MudText>
+    </div>
+
+    <!-- Search Panel -->
+    <MudPaper Elevation="4" Class="pa-5 mb-6"
+              Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a;">
+
+        <MudGrid Spacing="3">
+
+            <!-- Keywords -->
+            <MudItem xs="12" md="5">
+                <MudTextField T="string"
+                              Label="Keywords"
+                              Placeholder="Job title, skills, company..."
+                              Variant="Variant.Outlined"
+                              @bind-Value="_keywordText"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              AdornmentColor="Color.Primary" />
+            </MudItem>
+
+            <!-- Employment Type -->
+            <MudItem xs="12" md="5">
+                <MudText Style="color:#aaa; font-size:0.8rem; font-weight:600; letter-spacing:0.5px;" Class="mb-2">EMPLOYMENT TYPE</MudText>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var type in _employmentTypes)
+                    {
+                        <MudChip T="string"
+                                 Text="@type"
+                                 Variant="@(_employmentLevel == type ? Variant.Filled : Variant.Outlined)"
+                                 Color="@(_employmentLevel == type ? Color.Primary : Color.Default)"
+                                 OnClick="@(() => SetEmployment(type))"
+                                 Style="cursor:pointer; font-weight:500;" />
+                    }
+                </div>
+            </MudItem>
+
+            <!-- Posted After + Search Button -->
+            <MudItem xs="12" md="2" Class="d-flex flex-column justify-end">
+                <div class="d-flex align-center mb-2">
+                    <MudCheckBox @bind-Value="_usePostedAfter" Label="Posted after" Color="Color.Primary" />
+                </div>
+                @if (_usePostedAfter)
+                {
+                    <MudDatePicker @bind-Date="_postedAfter"
+                                   Variant="Variant.Outlined"
+                                   Class="mb-2" />
+                }
+                <MudButton Variant="Variant.Filled"
+                           Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                           FullWidth="true"
+                           OnClick="HandleSearch">
+                    Search
+                </MudButton>
+            </MudItem>
+
+        </MudGrid>
+
+    </MudPaper>
+
+    <!-- Results -->
+    @if (_jobListings == null)
+    {
+        <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Style="color:#444; font-size:4rem;" Class="mb-3" />
+            <MudText Typo="Typo.h6" Style="color:#666;">Enter keywords and hit Search to find jobs</MudText>
+        </div>
     }
-</p>
+    else if (_jobListings.Count == 0)
+    {
+        <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
+            <MudIcon Icon="@Icons.Material.Filled.Inbox" Style="color:#444; font-size:4rem;" Class="mb-3" />
+            <MudText Typo="Typo.h6" Style="color:#666;">No jobs found — try different keywords</MudText>
+        </div>
+    }
+    else
+    {
+        <MudText Style="color:#888; font-size:0.85rem;" Class="mb-3">@_jobListings.Count result(s) found</MudText>
+        <MudGrid Spacing="3">
 
-@if (_jobListings != null)
-{
-    <MudDataGrid Items="@_jobListings.Take(4)">
-        <Columns>
-            <PropertyColumn Property="x => x.Title" />
-            <PropertyColumn Property="x => x.Description" />
-            <PropertyColumn Property="x => x.ApplyUrl" />
-            <PropertyColumn Property="x => x.Pay" />
-            <PropertyColumn Property="x => x.DatePosted" />
-        </Columns>
-    </MudDataGrid>
-}
+            @foreach (var job in _jobListings)
+            {
+                <MudItem xs="12" md="6" lg="4">
+
+                    <MudPaper Elevation="6" Class="pa-5"
+                              Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+                        <div class="d-flex justify-space-between align-start mb-3">
+                            <MudText Typo="Typo.h6" Style="color:#ff6a00; font-weight:700; line-height:1.3;">
+                                @job.Title
+                            </MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Dark" Style="background:#2a2a2a; color:#ccc;">
+                                Full-time
+                            </MudChip>
+                        </div>
+
+                        <MudText Style="color:#bbb; font-size:0.9rem; line-height:1.5;" Class="mb-3">
+                            @job.Description
+                        </MudText>
+
+                        <div class="d-flex align-center gap-3 mb-4">
+                            <div class="d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Style="color:#ff6a00; font-size:1rem;" />
+                                <MudText Style="color:#ccc; font-size:0.85rem;">$@job.Pay/hr</MudText>
+                            </div>
+                            <div class="d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Style="color:#888; font-size:0.9rem;" />
+                                <MudText Style="color:#888; font-size:0.85rem;">@(job.DatePosted?.ToString("MMM d, yyyy") ?? "Unknown")</MudText>
+                            </div>
+                        </div>
+
+                        <MudDivider Style="border-color:#2a2a2a;" Class="mb-3" />
+
+                        <div class="d-flex gap-2">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.BookmarkBorder"
+                                       OnClick="@(() => AddToInterested(job))">
+                                Save
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled"
+                                       Style="background:#ff6a00; color:white; font-weight:600;"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Send"
+                                       OnClick="@(() => Apply(job))">
+                                Apply
+                            </MudButton>
+                        </div>
+
+                    </MudPaper>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+    }
+
+</MudContainer>
 
 @code {
+    [SupplyParameterFromQuery(Name = "q")]
+    private string? QueryKeyword { get; set; }
+
     private string _keywordText = "";
     private string _employmentLevel = "";
     private bool _usePostedAfter = false;
-    private DateTime _postedAfter = DateTime.Now;
+    private DateTime? _postedAfter = DateTime.Now;
+
+    private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
 
     private List<Job>? _jobListings;
 
-    private void HandleSearch()
+    protected override void OnInitialized()
     {
-        _jobListings = new List<Job>();
-        _jobListings.Add(new Job
+        if (!string.IsNullOrEmpty(QueryKeyword))
         {
-            Title = "Software Engineer",
-            Description = "Make software",
-            ApplyUrl = "http://google.com",
-            Pay = 100,
-            DatePosted = DateTime.Now
-        });
-        _jobListings.Add(new Job
-        {
-            Title = "Janitor",
-            Description = "Clean up",
-            ApplyUrl = "http://google.com",
-            Pay = 20,
-            DatePosted = DateTime.Now
-        });
-        _jobListings.Add(new Job
-        {
-            Title = "Dentist",
-            Description = "Pull teeth",
-            ApplyUrl = "http://google.com",
-            Pay = 2000,
-            DatePosted = DateTime.Now
-        });
+            _keywordText = QueryKeyword;
+            HandleSearch();
+        }
     }
 
+    private void HandleSearch()
+    {
+        _jobListings = new List<Job>
+        {
+            new Job { Title = "Software Engineer", Description = "Build and maintain scalable web applications using modern frameworks.", Pay = 100, DatePosted = DateTime.Now },
+            new Job { Title = "Web Developer", Description = "Design and develop responsive websites and user interfaces.", Pay = 80, DatePosted = DateTime.Now.AddDays(-3) },
+            new Job { Title = "Data Analyst", Description = "Analyze business data and produce actionable insights from large datasets.", Pay = 90, DatePosted = DateTime.Now.AddDays(-7) }
+        };
+    }
+
+    private void SetEmployment(string type)
+    {
+        _employmentLevel = _employmentLevel == type ? "" : type;
+    }
+
+    private void AddToInterested(Job job)
+    {
+        Console.WriteLine($"Saved: {job.Title}");
+    }
+
+    private void Apply(Job job)
+    {
+        Console.WriteLine($"Applied to: {job.Title}");
+    }
 }

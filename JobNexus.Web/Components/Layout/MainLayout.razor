@@ -1,35 +1,138 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="_darkTheme" />
 
 <MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h5" Class="mt-1">Application</MudText>
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        @Body
-    </MudMainContent>
-</MudLayout>
-@code {
-    bool _drawerOpen = true;
 
-    void DrawerToggle()
+    <!-- Top Bar -->
+    <MudAppBar Elevation="2"
+               Style="background-color:#1e1e1e; border-bottom:2px solid #ff6a00;">
+
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="ToggleDrawer" />
+
+        <MudIcon Icon="@Icons.Material.Filled.WorkspacePremium"
+                 Style="color:#ff6a00; font-size:1.6rem;" Class="ms-2 me-1" />
+
+        <MudText Typo="Typo.h6" Style="color:white; font-weight:700; letter-spacing:0.5px;">
+            JobNexus
+        </MudText>
+
+        <MudSpacer />
+
+        <MudButton Href="/login"
+                   Variant="Variant.Outlined"
+                   Style="border-color:#ff6a00; color:#ff6a00; font-weight:600;"
+                   Size="Size.Small">
+            Sign In
+        </MudButton>
+
+    </MudAppBar>
+
+    <!-- Sidebar -->
+    <MudDrawer @bind-Open="_drawerOpen"
+               Variant="DrawerVariant.Responsive"
+               Elevation="2"
+               Style="background-color:#1e1e1e;">
+
+        <div style="padding:20px 16px 8px 16px;">
+            <MudText Style="color:#666; font-size:0.68rem; font-weight:600; letter-spacing:1.8px;">NAVIGATION</MudText>
+        </div>
+
+        <MudNavMenu Class="pa-2">
+
+            <MudNavLink Href="/" Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Dashboard"
+                        IconColor="Color.Inherit"
+                        Class="nav-item-custom">
+                Dashboard
+            </MudNavLink>
+
+            <MudNavLink Href="/me"
+                        Icon="@Icons.Material.Filled.Person"
+                        IconColor="Color.Inherit"
+                        Class="nav-item-custom">
+                My Profile
+            </MudNavLink>
+
+            <MudNavLink Href="/search"
+                        Icon="@Icons.Material.Filled.Search"
+                        IconColor="Color.Inherit"
+                        Class="nav-item-custom">
+                Search Listings
+            </MudNavLink>
+
+            <MudNavLink Href="/profiles"
+                        Icon="@Icons.Material.Filled.Group"
+                        IconColor="Color.Inherit"
+                        Class="nav-item-custom">
+                Profiles
+            </MudNavLink>
+
+        </MudNavMenu>
+
+    </MudDrawer>
+
+    <!-- Main Content -->
+    <MudMainContent Style="background-color:#121212; min-height:100vh;">
+        <div class="main-content-inner">
+            @Body
+        </div>
+    </MudMainContent>
+
+</MudLayout>
+
+<style>
+    .main-content-inner {
+        padding: 24px;
+    }
+
+    .nav-item-custom {
+        color: #e0e0e0 !important;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .nav-item-custom:hover {
+        background-color: #2a2a2a !important;
+        color: white !important;
+    }
+
+    .nav-item-custom.active {
+        background-color: #ff6a00 !important;
+        color: white !important;
+    }
+
+    .nav-item-custom.active .mud-icon-root {
+        color: white !important;
+    }
+</style>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private void ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
     }
+
+    private MudTheme _darkTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Background = "#121212",
+            Surface = "#1e1e1e",
+            Primary = "#ff6a00",
+            Secondary = "#ff8c40",
+            AppbarBackground = "#1e1e1e",
+            DrawerBackground = "#1e1e1e",
+            TextPrimary = "#ffffff",
+            TextSecondary = "#cccccc",
+            ActionDefault = "#aaaaaa"
+        }
+    };
 }
-
-<MudThemeProvider />
-<MudPopoverProvider />
-
-<MudDialogProvider />
-
-<MudSnackbarProvider />

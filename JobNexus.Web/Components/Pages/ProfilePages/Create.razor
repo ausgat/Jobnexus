@@ -5,54 +5,73 @@
 @inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Create</PageTitle>
+<PageTitle>Create Profile — JobNexus</PageTitle>
 
-<h1>Create</h1>
+<div class="d-flex justify-center" style="min-height:80vh; align-items:flex-start; padding-top:24px;">
+    <MudPaper Elevation="6" Class="pa-8"
+              Style="background:#1e1e1e; border-radius:16px; width:100%; max-width:500px; border:1px solid #2a2a2a;">
 
-<h2>Profile</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+        <div class="d-flex align-center mb-1">
+            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Style="color:#ff6a00; font-size:1.6rem;" Class="me-2" />
+            <MudText Typo="Typo.h5" Style="color:white; font-weight:700;">Create Profile</MudText>
+        </div>
+        <MudText Style="color:#888; font-size:0.9rem;" Class="mb-6">Fill in your details to get started</MudText>
+
         <EditForm method="post" Model="ProfileModel" OnValidSubmit="AddProfile" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <label for="username" class="form-label">Username:</label> 
-                <InputText id="username" @bind-Value="ProfileModel.Username" class="form-control" />
-                <ValidationMessage For="() => ProfileModel.Username" class="text-danger" /> 
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password:</label> 
-                <InputText id="password" @bind-Value="ProfileModel.Password" class="form-control" /> 
-                <ValidationMessage For="() => ProfileModel.Password" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="email" class="form-label">Email:</label> 
-                <InputText id="email" @bind-Value="ProfileModel.Email" class="form-control" /> 
-                <ValidationMessage For="() => ProfileModel.Email" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="name" class="form-label">Name:</label> 
-                <InputText id="name" @bind-Value="ProfileModel.Name" class="form-control" /> 
-                <ValidationMessage For="() => ProfileModel.Name" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="bio" class="form-label">Bio:</label> 
-                <InputText id="bio" @bind-Value="ProfileModel.Bio" class="form-control" /> 
-                <ValidationMessage For="() => ProfileModel.Bio" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="location" class="form-label">Location:</label> 
-                <InputText id="location" @bind-Value="ProfileModel.Location" class="form-control" /> 
-                <ValidationMessage For="() => ProfileModel.Location" class="text-danger" /> 
-            </div>        
-            <button type="submit" class="btn btn-primary">Create</button>
-        </EditForm>
-    </div>
-</div>
+            <ValidationSummary class="validation-message mb-3" role="alert" />
 
-<div>
-    <a href="/profiles">Back to List</a>
+            <MudTextField T="string" Label="Username" @bind-Value="ProfileModel.Username"
+                          Variant="Variant.Outlined" Class="mb-3"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AlternateEmail"
+                          AdornmentColor="Color.Primary" />
+            <ValidationMessage For="() => ProfileModel.Username" class="validation-message mb-2" />
+
+            <MudTextField T="string" Label="Password" @bind-Value="ProfileModel.Password"
+                          Variant="Variant.Outlined" Class="mb-3"
+                          InputType="InputType.Password"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock"
+                          AdornmentColor="Color.Primary" />
+            <ValidationMessage For="() => ProfileModel.Password" class="validation-message mb-2" />
+
+            <MudTextField T="string" Label="Email" @bind-Value="ProfileModel.Email"
+                          Variant="Variant.Outlined" Class="mb-3"
+                          InputType="InputType.Email"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"
+                          AdornmentColor="Color.Primary" />
+            <ValidationMessage For="() => ProfileModel.Email" class="validation-message mb-2" />
+
+            <MudTextField T="string" Label="Full Name" @bind-Value="ProfileModel.Name"
+                          Variant="Variant.Outlined" Class="mb-3"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
+                          AdornmentColor="Color.Primary" />
+
+            <MudTextField T="string" Label="Bio" @bind-Value="ProfileModel.Bio"
+                          Variant="Variant.Outlined" Class="mb-3"
+                          Lines="3" />
+
+            <MudTextField T="string" Label="Location" @bind-Value="ProfileModel.Location"
+                          Variant="Variant.Outlined" Class="mb-5"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.LocationOn"
+                          AdornmentColor="Color.Primary" />
+
+            <div class="d-flex gap-3">
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                           FullWidth="true" Size="Size.Large">
+                    Create Profile
+                </MudButton>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           Href="/profiles"
+                           Size="Size.Large">
+                    Cancel
+                </MudButton>
+            </div>
+        </EditForm>
+
+    </MudPaper>
 </div>
 
 @code {
@@ -61,7 +80,6 @@
 
     protected override void OnInitialized() => ProfileModel ??= new();
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddProfile()
     {
         await using var context = await DbFactory.CreateDbContextAsync();

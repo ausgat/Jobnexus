@@ -4,44 +4,92 @@
 @inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Profile Details — JobNexus</PageTitle>
 
-<h1>Details</h1>
+@if (profile is null)
+{
+    <div class="d-flex justify-center align-center" style="min-height:60vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <div class="d-flex justify-center" style="min-height:80vh; align-items:flex-start; padding-top:24px;">
+        <MudPaper Elevation="6" Class="pa-8"
+                  Style="background:#1e1e1e; border-radius:16px; width:100%; max-width:500px; border:1px solid #2a2a2a;">
 
-<div>
-    <h2>Profile</h2>
-    <hr />
-    @if (profile is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Username</dt>
-            <dd class="col-sm-10">@profile.Username</dd>
-            <dt class="col-sm-2">Password</dt>
-            <dd class="col-sm-10">@profile.Password</dd>
-            <dt class="col-sm-2">Email</dt>
-            <dd class="col-sm-10">@profile.Email</dd>
-            <dt class="col-sm-2">Name</dt>
-            <dd class="col-sm-10">@profile.Name</dd>
-            <dt class="col-sm-2">Bio</dt>
-            <dd class="col-sm-10">@profile.Bio</dd>
-            <dt class="col-sm-2">Location</dt>
-            <dd class="col-sm-10">@profile.Location</dd>
-        </dl>
-        <div>
-            <a href="@($"/profiles/edit?username={profile.Username}")">Edit</a> |
-            <a href="@($"/profiles")">Back to List</a>
-        </div>
-    }
-</div>
+            <!-- Avatar + Name -->
+            <div class="d-flex align-center gap-4 mb-6">
+                <MudAvatar Style="background:#ff6a00; color:white; font-weight:700; font-size:1.4rem; width:64px; height:64px;">
+                    @(string.IsNullOrEmpty(profile.Name) ? profile.Username[0].ToString().ToUpper() : profile.Name[0].ToString().ToUpper())
+                </MudAvatar>
+                <div>
+                    <MudText Typo="Typo.h5" Style="color:white; font-weight:700;">@(profile.Name ?? profile.Username)</MudText>
+                    <MudText Style="color:#888; font-size:0.9rem;">@profile.Username</MudText>
+                </div>
+            </div>
+
+            <MudDivider Style="border-color:#333;" Class="mb-4" />
+
+            <!-- Details -->
+            <div class="d-flex flex-column gap-3 mb-6">
+
+                <div class="d-flex align-start gap-3">
+                    <MudIcon Icon="@Icons.Material.Filled.Email" Style="color:#ff6a00; font-size:1.1rem; margin-top:2px;" />
+                    <div>
+                        <MudText Style="color:#666; font-size:0.75rem; font-weight:600; letter-spacing:0.5px;">EMAIL</MudText>
+                        <MudText Style="color:#ccc;">@(profile.Email ?? "Not provided")</MudText>
+                    </div>
+                </div>
+
+                <div class="d-flex align-start gap-3">
+                    <MudIcon Icon="@Icons.Material.Filled.LocationOn" Style="color:#ff6a00; font-size:1.1rem; margin-top:2px;" />
+                    <div>
+                        <MudText Style="color:#666; font-size:0.75rem; font-weight:600; letter-spacing:0.5px;">LOCATION</MudText>
+                        <MudText Style="color:#ccc;">@(profile.Location ?? "Not provided")</MudText>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(profile.Bio))
+                {
+                    <div class="d-flex align-start gap-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Style="color:#ff6a00; font-size:1.1rem; margin-top:2px;" />
+                        <div>
+                            <MudText Style="color:#666; font-size:0.75rem; font-weight:600; letter-spacing:0.5px;">BIO</MudText>
+                            <MudText Style="color:#ccc; line-height:1.5;">@profile.Bio</MudText>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-3">
+                <MudButton Variant="Variant.Filled"
+                           Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           Href="@($"/profiles/edit?username={profile.Username}")"
+                           FullWidth="true">
+                    Edit
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Default"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Href="/profiles"
+                           FullWidth="true">
+                    Back
+                </MudButton>
+            </div>
+
+        </MudPaper>
+    </div>
+}
 
 @code {
     private Profile? profile;
 
     [SupplyParameterFromQuery]
-    private string Username { get; set; }
+    private string Username { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
