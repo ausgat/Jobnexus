@@ -16,7 +16,11 @@
             foreach (var job in _jobs)
             {
                 <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
-                    <MudLink Href="@($"/jobs/details?jobid={job.JobId}")">@job.Title</MudLink>
+                    <MudLink Href="@($"/jobs/details?jobid={job.JobId}")"
+                             Style="color:white; font-weight:600; font-size:0.95rem;"
+                             Color="Color.Default" >
+                        @job.Title
+                    </MudLink>
                     <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">@job.Company?.CompanyName</MudText>
                     <div class="d-flex justify-space-between align-center">
                         <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$@job.Pay/hr</MudText>

@@ -1,3 +1,88 @@
 @page "/me"
+@using Microsoft.EntityFrameworkCore
+@using JobNexus.Core.Models
+@using JobNexus.Web.Components.Shared
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+@inject NavigationManager NavigationManager
 
-<PageTitle>My Profile — JobNexus</PageTitle>
+<PageTitle>My Profile</PageTitle>
+
+<div class="mb-6">
+    <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">My Profile</MudText>
+    <MudText Style="color:#999; margin-top:4px;">Edit your profile here</MudText>
+</div>
+@if (_profile is null)
+{
+    <p><em>Loading...</em></p>
+}
+else {
+    <MudCard Elevation="4" Class="pa-5 mb-6"
+             Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a;">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Color="Color.Secondary">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default"/>
+                </MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1">@_profile.Name</MudText>
+                <MudText Typo="Typo.body2">@@@_profile.Username</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudTooltip Text="Edit Profile">
+                    <MudIconButton
+                        Icon="@Icons.Material.Filled.Edit"
+                        Color="Color.Default"
+                        Href="@($"/profiles/edit?username={_profile.Username}")"/>
+                </MudTooltip>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSimpleTable Elevation="0">
+                        <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <td>@_profile.Name</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>@_profile.Email</td>
+                        </tr>
+                        <tr>
+                            <th>Bio</th>
+                            <td>@_profile.Bio</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>@_profile.Location</td>
+                        </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudItem>
+                <MudItem xs="6">
+                    <CertificationList Username="@_profile.Username" />
+                </MudItem>
+                <MudItem xs="6">
+                    <SkillList Username="@_profile.Username" />
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    private Profile? _profile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _profile = await context.Profiles.FirstOrDefaultAsync();
+
+        if (_profile is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}
