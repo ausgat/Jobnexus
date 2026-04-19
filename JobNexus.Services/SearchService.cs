@@ -69,7 +69,7 @@ public class SearchService(IDbContextFactory<JobNexusContext> contextFactory)
         var countQuery = await baseQuery.CountAsync();
         var paginatedQuery = await baseQuery
             .OrderByDescending(j => j.DatePosted)
-            .Skip(Math.Min((searchQuery.PageNumber - 1) * searchQuery.ResultsPerPage, 0))
+            .Skip(Math.Max((searchQuery.PageNumber - 1) * searchQuery.ResultsPerPage, 0))
             .Take(searchQuery.ResultsPerPage)
             .ToListAsync();        
 

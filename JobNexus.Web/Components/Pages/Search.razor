@@ -2,6 +2,7 @@
 @using JobNexus.Core.Models
 @using JobNexus.Core.Search
 @using JobNexus.Services
+@using Microsoft.AspNetCore.Mvc.Filters
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject SearchService SearchService
@@ -23,8 +24,8 @@
         <MudGrid Spacing="3">
 
             <!-- Salary slider -->
-            <MudSlider @bind-Value="minSalary" Min="15000" Max="200000" TickMarks="true" Step="5000" Color="Color.Info">Minimum salary: @minSalary.ToString("C2")</MudSlider>
-            <MudSlider @bind-Value="maxSalary" Min="15000" Max="200000" TickMarks="true" Step="5000" Color="Color.Info">Maximum salary: @maxSalary.ToString("C2")</MudSlider>
+            <MudSlider @bind-Value="_minSalary" Min="15000" Max="200000" TickMarks="true" Step="5000" Color="Color.Info">Minimum salary: @_minSalary.ToString("C2")</MudSlider>
+            <MudSlider @bind-Value="_maxSalary" Min="15000" Max="200000" TickMarks="true" Step="5000" Color="Color.Info">Maximum salary: @_maxSalary.ToString("C2")</MudSlider>
 
 
             <!-- Keywords -->
@@ -80,11 +81,12 @@
                 }
             </MudItem>
 
+            <!-- Search button -->
             <MudItem xs="12" md="2" Class="d-flex flex-column justify-end">
                 <MudButton Variant="Variant.Filled"
                            Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
                            FullWidth="true"
-                           OnClick="HandleSearch">
+                           OnClick="() => HandleSearch(1)">
                     Search
                 </MudButton>
             </MudItem>
@@ -175,7 +177,11 @@
     <!-- Pagination -->
     @if (_searchResults != null){
         <div class="d-flex flex-column align-center justify-center" style="padding:30px 0;">
-            <MudPagination Align="Align.Center" Color="Color.Primary" Count="_searchResults.PageCount" @bind-Selected="@_selected"/>
+            <MudPagination 
+                Color="Color.Primary" 
+                Count="_searchResults.PageCount" 
+                SelectedChanged="HandleSearch"
+                />
             <MudText Align="Align.Center">Showing @_searchResults.Count out of @_searchResults.TotalCount results.</MudText>
         </div>
     }
@@ -191,10 +197,9 @@
     private string _employmentLevel = "";
     private bool _usePostedAfter;
     private DateTime? _postedAfter = DateTime.Now;
-    private int minSalary = 15000;
-    private int maxSalary = 200000;
-    
-    private int _selected = 1;
+    private int _minSalary = 15000;
+    private int _maxSalary = 200000;
+    private int _selectedPage = 1;
 
     private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
 
@@ -205,11 +210,11 @@
         if (!string.IsNullOrEmpty(QueryKeyword))
         {
             _keywordText = QueryKeyword;
-            await HandleSearch();
+            await HandleSearch(1);
         }
     }
 
-    private async Task HandleSearch()
+    private async Task HandleSearch(int pageNumber)
     {
         await using var context = await DbFactory.CreateDbContextAsync();
         var searchQuery = new SearchQuery
@@ -218,9 +223,9 @@
             Company = _companyText,
             EmploymentType = ToEmploymentType(_employmentLevel),
             ResultsPerPage = 12,
-            PageNumber = _selected,
-            MaxPay = maxSalary,
-            MinPay = minSalary
+            PageNumber = pageNumber,
+            MaxPay = _maxSalary,
+            MinPay = _minSalary
         };
         if (_usePostedAfter)
         {
