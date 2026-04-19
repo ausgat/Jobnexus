@@ -1,6 +1,5 @@
 ﻿@page "/register"
 
-@using Microsoft.AspNetCore.Authorization
 @model RegisterModel
 
 @{
@@ -9,7 +8,7 @@
 
 <div class="d-flex justify-content-center mb-5">
     <div class="flex-column" style="width: 20rem">
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        <form id="registerForm" method="post">
             <h2>Create a new account</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>

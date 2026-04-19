@@ -1,6 +1,5 @@
 ﻿@page "/login"
 
-@using Microsoft.AspNetCore.Authorization
 @model LoginModel
 
 @{
@@ -36,7 +35,7 @@
             </div>
             <div>
                 <p>
-                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                    <a asp-page="./Register">Register as a new user</a>
                 </p>
             </div>
         </form>

@@ -37,8 +37,6 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public string ReturnUrl { get; set; }
-
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public class InputModel
@@ -70,15 +68,23 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync()
         {
-            ReturnUrl = returnUrl;
+            if (_signInManager.IsSignedIn(User))
+            {
+                return LocalRedirect("/");
+            }
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync()
         {
-            returnUrl ??= Url.Content("~/");
+            if (_signInManager.IsSignedIn(User))
+            {
+                return LocalRedirect("/");
+            }
+            
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
@@ -96,7 +102,7 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    return LocalRedirect("/");
                 }
                 foreach (var error in result.Errors)
                 {

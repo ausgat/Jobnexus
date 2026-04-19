@@ -1,11 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 using JobNexus.Core.Models;
 
 namespace JobNexus.Web.Areas.Identity.Pages.Account
@@ -25,8 +23,6 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
         [BindProperty]
         public InputModel Input { get; set; }
 
-        public string? ReturnUrl { get; set; }
-
         [TempData]
         public string? ErrorMessage { get; set; }
 
@@ -44,24 +40,30 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string? returnUrl = null)
+        public async Task<IActionResult> OnGetAsync()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                return LocalRedirect("/");
+            }
+            
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
             }
 
-            returnUrl ??= Url.Content("~/");
-
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            ReturnUrl = returnUrl;
+            
+            return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+        public async Task<IActionResult> OnPostAsync()
         {
-            returnUrl ??= Url.Content("~/");
+            if (_signInManager.IsSignedIn(User))
+            {
+                return LocalRedirect("/");
+            }
 
             if (ModelState.IsValid)
             {
@@ -71,7 +73,7 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    return LocalRedirect("/");
                 }
                 if (result.IsLockedOut)
                 {
