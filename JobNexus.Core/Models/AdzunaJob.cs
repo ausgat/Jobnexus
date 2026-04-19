@@ -64,8 +64,8 @@ public class AdzunaJob
  
     // Whether the salary was predicted by Adzuna (1) or explicitly listed (0)
     // TODO: Consider filtering out predicted salaries if accuracy is important
-    [JsonPropertyName("salary_is_predicted")]
-    public int? SalaryIsPredicted { get; set; }
+   [JsonPropertyName("salary_is_predicted")]
+    public string? SalaryIsPredicted { get; set; }
  
     // Nested company object — only display_name is provided by Adzuna
     [JsonPropertyName("company")]
