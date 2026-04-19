@@ -32,7 +32,7 @@ public class AdzunaNormalizerTest : DbTestBase
             Created = new DateTime(2026, 1, 15),
             SalaryMin = salaryMin,
             SalaryMax = salaryMax,
-            SalaryIsPredicted = 0,
+            SalaryIsPredicted = "0",
             Company = new AdzunaCompany { DisplayName = company },
             Category = new AdzunaCategory { Label = category, Tag = "it-jobs" },
             Location = new AdzunaLocation { DisplayName = "Dallas, TX" }

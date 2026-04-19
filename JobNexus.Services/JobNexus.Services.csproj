@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <!-- Background service and hosting -->
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.14" />
     <!-- EF Core for DB access in services -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.14" />
     <!-- LinqKit for predicate building in SearchService -->
@@ -16,7 +16,7 @@
     <!-- MudBlazor — needed for CurrentUserService auth state -->
     <PackageReference Include="MudBlazor" Version="9.3.0" />
     <!-- ASP.NET Core Identity — needed for CurrentUserService -->
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.14" />
   </ItemGroup>
   
  <ItemGroup>
