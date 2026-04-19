@@ -18,6 +18,26 @@
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
+      },
+      "http-nojobsync": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "http://localhost:5103",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "NO_JOB_SYNC": "true"
+        }
+      },
+      "https-nojobsync": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "applicationUrl": "https://localhost:7262;http://localhost:5103",
+        "environmentVariables": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "NO_JOB_SYNC": "true"
+        }
       }
     }
   }

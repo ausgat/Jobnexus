@@ -38,7 +38,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddHostedService<JobSyncService>();
+
+if (Environment.GetEnvironmentVariable("NO_JOB_SYNC") != "true")
+    builder.Services.AddHostedService<JobSyncService>();
+
 builder.Services.AddScoped<SearchService>();
 
 var app = builder.Build();
