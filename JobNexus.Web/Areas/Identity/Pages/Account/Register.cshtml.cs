@@ -48,6 +48,12 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
             public string Name { get; set; }
             
             [Required]
+            [Display(Name = "Username")]
+            [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "Only alphanumeric characters are allowed.")]
+            [StringLength(50, MinimumLength = 3, ErrorMessage = "The name must be between 3 and 50 characters long.")]
+            public string UserName { get; set; }           
+            
+            [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
@@ -78,7 +84,7 @@ namespace JobNexus.Web.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 
                 user.Name = Input.Name;
