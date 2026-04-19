@@ -27,5 +27,5 @@ public class SearchResults(List<Job> jobs, int resultsPerPage, int totalCount)
     /// <summary>
     /// Total number of pages containing search results.
     /// </summary>
-    public int PageCount => (int)Math.Ceiling((double)Jobs.Count / resultsPerPage);
+    public int PageCount => (int)Math.Ceiling((double)TotalCount / resultsPerPage);
 }

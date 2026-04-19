@@ -191,11 +191,10 @@
     private string _employmentLevel = "";
     private bool _usePostedAfter;
     private DateTime? _postedAfter = DateTime.Now;
+    private int minSalary = 15000;
+    private int maxSalary = 200000;
     
     private int _selected = 1;
-    
-    public int minSalary = 15000;
-    public int maxSalary = 200000;
 
     private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
 
@@ -219,7 +218,7 @@
             Company = _companyText,
             EmploymentType = ToEmploymentType(_employmentLevel),
             ResultsPerPage = 12,
-            PageNumber = 1,
+            PageNumber = _selected,
             MaxPay = maxSalary,
             MinPay = minSalary
         };
