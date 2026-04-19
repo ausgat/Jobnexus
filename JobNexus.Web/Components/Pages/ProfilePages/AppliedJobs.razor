@@ -1,0 +1,58 @@
+@page "/appliedjobs"
+@using Microsoft.EntityFrameworkCore
+@using JobNexus.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
+
+<PageTitle>Applied Jobs</PageTitle>
+
+<h1>Applied Jobs</h1>
+
+<p>
+    <a href="/appliedjobs/create">Create New</a>
+</p>
+
+<MudDataGrid T="AppliedJobDisplay" Items="@appliedJobList">
+    <Columns>
+        <PropertyColumn Property="x => x.Username" Title="Username" />
+        <PropertyColumn Property="x => x.JobTitle" Title="Job Title" />
+        <PropertyColumn Property="x => x.CompanyName" Title="Company" />
+        <PropertyColumn Property="x => x.ApplicationDate" Title="Date Applied" />
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private JobNexusContext context = default!;
+    private List<AppliedJobDisplay> appliedJobList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+
+        appliedJobList = await (
+            from a in context.AppliedJobs
+            join j in context.Jobs on a.JobId equals j.JobId
+            join c in context.Companies on j.CompanyId equals c.CompanyId
+            select new AppliedJobDisplay
+            {
+                Username = a.Username,
+                JobTitle = j.Title,
+                CompanyName = c.CompanyName,
+                ApplicationDate = a.ApplicationDate
+            }
+        ).ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await context.DisposeAsync();
+    }
+
+    public class AppliedJobDisplay
+    {
+        public string Username { get; set; } = string.Empty;
+        public string JobTitle { get; set; } = string.Empty;
+        public string CompanyName { get; set; } = string.Empty;
+        public DateTime ApplicationDate { get; set; }
+    }
+}
