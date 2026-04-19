@@ -36,7 +36,7 @@
 
     private void OnRowClick(DataGridRowClickEventArgs<Profile> args)
     {
-        NavigationManager.NavigateTo($"/profiles/details?username={args.Item.Username}");
+        NavigationManager.NavigateTo($"/profiles/details?username={args.Item.UserName}");
     }
 
     public async ValueTask DisposeAsync() => await _context.DisposeAsync();
