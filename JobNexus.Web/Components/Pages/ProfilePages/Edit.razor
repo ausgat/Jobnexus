@@ -1,62 +1,79 @@
 @page "/profiles/edit"
+@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
 @using JobNexus.Web.ViewModels
+@using Microsoft.AspNetCore.Authorization
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit</PageTitle>
+<PageTitle>Edit Profile — JobNexus</PageTitle>
 
-<h1>Edit</h1>
-
-<h2>Profile</h2>
-<hr />
 @if (Profile is null)
 {
-    <p><em>Loading...</em></p>
+    <div class="d-flex justify-center align-center" style="min-height:60vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
 }
 else
 {
-    <div class="row">
-        <div class="col-md-4">
+    <div class="d-flex justify-center" style="min-height:80vh; align-items:flex-start; padding-top:24px;">
+        <MudPaper Elevation="6" Class="pa-8"
+                  Style="background:#1e1e1e; border-radius:16px; width:100%; max-width:500px; border:1px solid #2a2a2a;">
+
+            <div class="d-flex align-center mb-1">
+                <MudIcon Icon="@Icons.Material.Filled.Edit" Style="color:#ff6a00; font-size:1.6rem;" Class="me-2" />
+                <MudText Typo="Typo.h5" Style="color:white; font-weight:700;">Edit Profile</MudText>
+            </div>
+            <MudText Style="color:#888; font-size:0.9rem;" Class="mb-6">
+                Editing: <strong style="color:#ff6a00;">@Profile.UserName</strong>
+            </MudText>
+
             <EditForm method="post" Model="ProfileForm" OnValidSubmit="UpdateProfile" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <InputHidden id="username" @bind-Value="ProfileForm.Username" />
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password:</label>
-                    <InputText id="password" @bind-Value="ProfileForm.Password" class="form-control" />
-                    <ValidationMessage For="() => ProfileForm.Password" class="text-danger" />
+                <ValidationSummary role="alert" class="validation-message mb-3" />
+                <InputHidden id="username" @bind-Value="ProfileForm!.Username" />
+
+                <MudTextField T="string" Label="Email" @bind-Value="ProfileForm!.Email"
+                              Variant="Variant.Outlined" Class="mb-3"
+                              InputType="InputType.Email"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email"
+                              AdornmentColor="Color.Primary" />
+                <ValidationMessage For="() => ProfileForm!.Email" class="validation-message mb-2" />
+
+                <MudTextField T="string" Label="Full Name" @bind-Value="ProfileForm!.Name"
+                              Variant="Variant.Outlined" Class="mb-3"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
+                              AdornmentColor="Color.Primary" />
+
+                <MudTextField T="string" Label="Bio" @bind-Value="ProfileForm!.Bio"
+                              Variant="Variant.Outlined" Class="mb-3"
+                              Lines="3" />
+
+                <MudTextField T="string" Label="Location" @bind-Value="ProfileForm!.Location"
+                              Variant="Variant.Outlined" Class="mb-5"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.LocationOn"
+                              AdornmentColor="Color.Primary" />
+
+                <div class="d-flex gap-3">
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                               FullWidth="true" Size="Size.Large">
+                        Save Changes
+                    </MudButton>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Default"
+                               Href="/profiles"
+                               Size="Size.Large">
+                        Cancel
+                    </MudButton>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email:</label>
-                    <InputText id="email" @bind-Value="ProfileForm.Email" class="form-control" />
-                    <ValidationMessage For="() => ProfileForm.Email" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name:</label>
-                    <InputText id="name" @bind-Value="ProfileForm.Name" class="form-control" />
-                    <ValidationMessage For="() => ProfileForm.Name" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="bio" class="form-label">Bio:</label>
-                    <InputText id="bio" @bind-Value="ProfileForm.Bio" class="form-control" />
-                    <ValidationMessage For="() => ProfileForm.Bio" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="location" class="form-label">Location:</label>
-                    <InputText id="location" @bind-Value="ProfileForm.Location" class="form-control" />
-                    <ValidationMessage For="() => ProfileForm.Location" class="text-danger" />
-                </div>
-                <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
-        </div>
+
+        </MudPaper>
     </div>
 }
-
-<div>
-    <a href="/profiles">Back to List</a>
-</div>
 
 @code {
     [SupplyParameterFromQuery]
@@ -66,18 +83,17 @@ else
     private ProfileModel? ProfileForm { get; set; }
 
     private Profile? Profile { get; set; }
-    
+
     protected override async Task OnInitializedAsync()
     {
         await using var context = await DbFactory.CreateDbContextAsync();
-        Profile ??= await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
+        Profile ??= await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
 
-        if (Profile is not null)
+        if (Profile is not null && Profile.UserName is not null)
         {
             ProfileForm ??= new ProfileModel
             {
-                Username = Profile.Username,
-                Password = Profile.Password,
+                Username = Profile.UserName,
                 Email = Profile.Email,
                 Name = Profile.Name,
                 Bio = Profile.Bio,
@@ -90,8 +106,6 @@ else
         }
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateProfile()
     {
         await using var context = await DbFactory.CreateDbContextAsync();
@@ -99,7 +113,6 @@ else
 
         if (Profile is not null && ProfileForm is not null)
         {
-            Profile.Password = ProfileForm.Password;
             Profile.Email = ProfileForm.Email;
             Profile.Name = ProfileForm.Name;
             Profile.Bio = ProfileForm.Bio;
@@ -108,11 +121,12 @@ else
 
         try
         {
-            await context.SaveChangesAsync();               
+            await context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!ProfileExists(Profile!.Username))
+            var userName = Profile!.UserName;
+            if (userName != null && !ProfileExists(userName))
             {
                 NavigationManager.NavigateTo("notfound");
             }
@@ -128,6 +142,6 @@ else
     private bool ProfileExists(string username)
     {
         using var context = DbFactory.CreateDbContext();
-        return context.Profiles.Any(e => e.Username == username);
+        return context.Profiles.Any(e => e.UserName == username);
     }
 }

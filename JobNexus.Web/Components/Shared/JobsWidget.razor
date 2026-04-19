@@ -1,0 +1,47 @@
+@using JobNexus.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+
+<MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+    <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+        <MudIcon Icon="@Icons.Material.Filled.Newspaper" Style="color:#ff6a00;" />
+        <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">New Job Postings</MudText>
+    </div>
+
+    <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+
+        @if (_jobs != null)
+        {
+            foreach (var job in _jobs)
+            {
+                <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                    <MudLink Href="@($"/jobs/details?jobid={job.JobId}")"
+                             Style="color:white; font-weight:600; font-size:0.95rem;"
+                             Color="Color.Default" >
+                        @job.Title
+                    </MudLink>
+                    <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">@job.Company?.CompanyName</MudText>
+                    <div class="d-flex justify-space-between align-center">
+                        <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$@job.Pay/hr</MudText>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">New</MudChip>
+                    </div>
+                </MudPaper>
+            }
+        }
+
+    </div>
+
+</MudPaper>
+
+@code {
+
+    private List<Job>? _jobs;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        _jobs = await context.Jobs.OrderByDescending(j => j.DatePosted).Take(3).ToListAsync();
+    }
+
+}
