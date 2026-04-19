@@ -91,19 +91,19 @@ public partial class JobNexusContext : IdentityDbContext<Profile>
 
             entity.Property(e => e.JobId).HasColumnName("Job_id");
             entity.Property(e => e.ApplyUrl)
-                .HasMaxLength(50)
+                .HasMaxLength(200)
                 .HasColumnName("apply_url");
             entity.Property(e => e.CompanyId).HasColumnName("company_id");
             entity.Property(e => e.DatePosted)
                 .HasColumnType("datetime")
                 .HasColumnName("date_posted");
             entity.Property(e => e.Description)
-                .HasMaxLength(100)
+                .HasMaxLength(1000)
                 .HasColumnName("description");
             entity.Property(e => e.Pay).HasColumnName("pay");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.Title)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .HasColumnName("title");
 
             entity.HasOne(d => d.Company).WithMany(p => p.Jobs)
