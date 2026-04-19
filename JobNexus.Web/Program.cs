@@ -21,22 +21,21 @@ var configString = builder.Configuration.GetConnectionString("JobNexusDatabase")
     ?? throw new InvalidOperationException("ConnectionString \"JobNexusDatabase\" does not exist.");
 builder.Services.AddDbContextFactory<JobNexusContext>(options =>
     options.UseMySql(configString, serverVersion: ServerVersion.AutoDetect(configString)));
+builder.Services.AddScoped<JobNexusContext>(p => 
+    p.GetRequiredService<IDbContextFactory<JobNexusContext>>().CreateDbContext());
 
 // Needed for identity service
-builder.Services.AddDbContextFactory<JobNexusContext>(options =>
-    options.UseMySql(configString, serverVersion: ServerVersion.AutoDetect(configString)));
-
-builder.Services.AddDefaultIdentity<Profile>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services
+    .AddDefaultIdentity<Profile>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<JobNexusContext>();
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
     options.LogoutPath = "/logout";
     options.AccessDeniedPath = "/accessdenied";
 });
-
-builder.Services.AddScoped<CurrentUserService>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddHostedService<JobSyncService>();
