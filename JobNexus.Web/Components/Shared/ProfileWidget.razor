@@ -1,8 +1,11 @@
 @using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+@inject IDbContextFactory<Data.JobNexusContext> DbContextFactory
+@inject UserManager<Profile> UserManager
 
-@if (_profile != null)
+@if (_currentProfile != null)
 {
     <MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
 
@@ -18,8 +21,8 @@
                     U
                 </MudAvatar>
                 <div>
-                    <MudText Style="color:white; font-weight:600;">@_profile.Username</MudText>
-                    <MudText Style="color:#aaa; font-size:0.8rem;">@_profile.Email</MudText>
+                    <MudText Style="color:white; font-weight:600;">@_currentProfile.Name</MudText>
+                    <MudText Style="color:#aaa; font-size:0.8rem;">@_currentProfile.Email</MudText>
                 </div>
             </div>
 
@@ -36,7 +39,7 @@
                 </div>
                 <div class="d-flex justify-space-between">
                     <MudText Style="color:#888; font-size:0.85rem;">Location</MudText>
-                    <MudText Style="color:#ccc; font-size:0.85rem;">@_profile.Location</MudText>
+                    <MudText Style="color:#ccc; font-size:0.85rem;">@_currentProfile.Location</MudText>
                 </div>
             </div>
 
@@ -46,14 +49,14 @@
                 <MudButton Variant="Variant.Outlined"
                            Color="Color.Primary"
                            Size="Size.Small"
-                           Href="@($"/profiles/details?username={@_profile.Username}")"
+                           Href="@($"/profiles/details?username={@_currentProfile.UserName}")"
                            FullWidth="true">
                     View
                 </MudButton>
                 <MudButton Variant="Variant.Filled"
                            Style="background:#ff6a00; color:white; font-weight:600;"
                            Size="Size.Small"
-                           Href="@($"/profiles/edit?username={@_profile.Username}")"
+                           Href="@($"/profiles/edit?username={@_currentProfile.UserName}")"
                            FullWidth="true">
                     Edit
                 </MudButton>
@@ -66,13 +69,25 @@
 
 @code {
 
-    private Profile? _profile;
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Get the logged in user
-        await using var context = await DbFactory.CreateDbContextAsync();
-        _profile = await context.Profiles.FirstOrDefaultAsync();
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles.FirstOrDefaultAsync(p =>
+                    p.UserName == user.Identity.Name);
+            }
+        }
     }
 
 }

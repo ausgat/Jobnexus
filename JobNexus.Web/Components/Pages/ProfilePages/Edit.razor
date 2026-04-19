@@ -1,7 +1,9 @@
 @page "/profiles/edit"
+@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
 @using JobNexus.Web.ViewModels
+@using Microsoft.AspNetCore.Authorization
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -24,20 +26,13 @@ else
                 <MudText Typo="Typo.h5" Style="color:white; font-weight:700;">Edit Profile</MudText>
             </div>
             <MudText Style="color:#888; font-size:0.9rem;" Class="mb-6">
-                Editing: <strong style="color:#ff6a00;">@Profile.Username</strong>
+                Editing: <strong style="color:#ff6a00;">@Profile.UserName</strong>
             </MudText>
 
             <EditForm method="post" Model="ProfileForm" OnValidSubmit="UpdateProfile" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
                 <ValidationSummary role="alert" class="validation-message mb-3" />
                 <InputHidden id="username" @bind-Value="ProfileForm!.Username" />
-
-                <MudTextField T="string" Label="Password" @bind-Value="ProfileForm!.Password"
-                              Variant="Variant.Outlined" Class="mb-3"
-                              InputType="InputType.Password"
-                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Lock"
-                              AdornmentColor="Color.Primary" />
-                <ValidationMessage For="() => ProfileForm!.Password" class="validation-message mb-2" />
 
                 <MudTextField T="string" Label="Email" @bind-Value="ProfileForm!.Email"
                               Variant="Variant.Outlined" Class="mb-3"
@@ -92,14 +87,13 @@ else
     protected override async Task OnInitializedAsync()
     {
         await using var context = await DbFactory.CreateDbContextAsync();
-        Profile ??= await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
+        Profile ??= await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
 
-        if (Profile is not null)
+        if (Profile is not null && Profile.UserName is not null)
         {
             ProfileForm ??= new ProfileModel
             {
-                Username = Profile.Username,
-                Password = Profile.Password,
+                Username = Profile.UserName,
                 Email = Profile.Email,
                 Name = Profile.Name,
                 Bio = Profile.Bio,
@@ -119,7 +113,6 @@ else
 
         if (Profile is not null && ProfileForm is not null)
         {
-            Profile.Password = ProfileForm.Password;
             Profile.Email = ProfileForm.Email;
             Profile.Name = ProfileForm.Name;
             Profile.Bio = ProfileForm.Bio;
@@ -132,7 +125,8 @@ else
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!ProfileExists(Profile!.Username))
+            var userName = Profile!.UserName;
+            if (userName != null && !ProfileExists(userName))
             {
                 NavigationManager.NavigateTo("notfound");
             }
@@ -148,6 +142,6 @@ else
     private bool ProfileExists(string username)
     {
         using var context = DbFactory.CreateDbContext();
-        return context.Profiles.Any(e => e.Username == username);
+        return context.Profiles.Any(e => e.UserName == username);
     }
 }

@@ -1,6 +1,8 @@
 @page "/profiles/details"
+@attribute [Authorize]
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Authorization
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -21,11 +23,11 @@ else
             <!-- Avatar + Name -->
             <div class="d-flex align-center gap-4 mb-6">
                 <MudAvatar Style="background:#ff6a00; color:white; font-weight:700; font-size:1.4rem; width:64px; height:64px;">
-                    @(string.IsNullOrEmpty(profile.Name) ? profile.Username[0].ToString().ToUpper() : profile.Name[0].ToString().ToUpper())
+                    @(string.IsNullOrEmpty(profile.Name) ? profile.UserName[0].ToString().ToUpper() : profile.Name[0].ToString().ToUpper())
                 </MudAvatar>
                 <div>
-                    <MudText Typo="Typo.h5" Style="color:white; font-weight:700;">@(profile.Name ?? profile.Username)</MudText>
-                    <MudText Style="color:#888; font-size:0.9rem;">@profile.Username</MudText>
+                    <MudText Typo="Typo.h5" Style="color:white; font-weight:700;">@(profile.Name ?? profile.UserName)</MudText>
+                    <MudText Style="color:#888; font-size:0.9rem;">@profile.UserName</MudText>
                 </div>
             </div>
 
@@ -68,7 +70,7 @@ else
                 <MudButton Variant="Variant.Filled"
                            Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
                            StartIcon="@Icons.Material.Filled.Edit"
-                           Href="@($"/profiles/edit?username={profile.Username}")"
+                           Href="@($"/profiles/edit?username={profile.UserName}")"
                            FullWidth="true">
                     Edit
                 </MudButton>
@@ -94,7 +96,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await using var context = await DbFactory.CreateDbContextAsync();
-        profile = await context.Profiles.FirstOrDefaultAsync(m => m.Username == Username);
+        profile = await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
 
         if (profile is null)
         {

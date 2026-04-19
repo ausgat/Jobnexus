@@ -1,3 +1,37 @@
 @page "/profiles"
+@attribute [Authorize]
+@using Microsoft.EntityFrameworkCore
+@using JobNexus.Core.Models
+@using JobNexus.Data
+@using Microsoft.AspNetCore.Authorization
+@implements IAsyncDisposable
+@inject IDbContextFactory<JobNexus.Data.JobNexusContext> DbFactory
 
-<PageTitle>Profiles — JobNexus</PageTitle>
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="profiles/create">Create New</a>
+</p>
+
+<MudDataGrid Items="@context.Profiles">
+    <Columns>
+        <PropertyColumn Property="x => x.UserName" />
+        <PropertyColumn Property="x => x.Email" />
+        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Bio" />
+        <PropertyColumn Property="x => x.Location" />
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private JobNexusContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

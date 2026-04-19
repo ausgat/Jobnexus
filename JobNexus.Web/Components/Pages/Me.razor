@@ -1,9 +1,12 @@
 @page "/me"
-@using Microsoft.EntityFrameworkCore
+@attribute [Authorize]
 @using JobNexus.Core.Models
+@using JobNexus.Data
 @using JobNexus.Web.Components.Shared
-@inject IDbContextFactory<Data.JobNexusContext> DbFactory
-@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<JobNexusContext> DbContextFactory
 
 <PageTitle>My Profile</PageTitle>
 
@@ -11,7 +14,7 @@
     <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">My Profile</MudText>
     <MudText Style="color:#999; margin-top:4px;">Edit your profile here</MudText>
 </div>
-@if (_profile is null)
+@if (_currentProfile is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -25,15 +28,15 @@ else {
                 </MudAvatar>
             </CardHeaderAvatar>
             <CardHeaderContent>
-                <MudText Typo="Typo.body1">@_profile.Name</MudText>
-                <MudText Typo="Typo.body2">@@@_profile.Username</MudText>
+                <MudText Typo="Typo.body1">@_currentProfile.Name</MudText>
+                <MudText Typo="Typo.body2">@@@_currentProfile.UserName</MudText>
             </CardHeaderContent>
             <CardHeaderActions>
                 <MudTooltip Text="Edit Profile">
                     <MudIconButton
                         Icon="@Icons.Material.Filled.Edit"
                         Color="Color.Default"
-                        Href="@($"/profiles/edit?username={_profile.Username}")"/>
+                        Href="@($"/profiles/edit?username={_currentProfile.UserName}")"/>
                 </MudTooltip>
             </CardHeaderActions>
         </MudCardHeader>
@@ -44,28 +47,28 @@ else {
                         <tbody>
                         <tr>
                             <th>Name</th>
-                            <td>@_profile.Name</td>
+                            <td>@_currentProfile.Name</td>
                         </tr>
                         <tr>
                             <th>Email</th>
-                            <td>@_profile.Email</td>
+                            <td>@_currentProfile.Email</td>
                         </tr>
                         <tr>
                             <th>Bio</th>
-                            <td>@_profile.Bio</td>
+                            <td>@_currentProfile.Bio</td>
                         </tr>
                         <tr>
                             <th>Location</th>
-                            <td>@_profile.Location</td>
+                            <td>@_currentProfile.Location</td>
                         </tr>
                         </tbody>
                     </MudSimpleTable>
                 </MudItem>
                 <MudItem xs="6">
-                    <CertificationList Username="@_profile.Username" />
+                    <CertificationList Username="@_currentProfile.UserName" />
                 </MudItem>
                 <MudItem xs="6">
-                    <SkillList Username="@_profile.Username" />
+                    <SkillList Username="@_currentProfile.UserName" />
                 </MudItem>
             </MudGrid>
         </MudCardContent>
@@ -73,16 +76,24 @@ else {
 }
 
 @code {
-    private Profile? _profile;
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
 
     protected override async Task OnInitializedAsync()
     {
-        await using var context = await DbFactory.CreateDbContextAsync();
-        _profile = await context.Profiles.FirstOrDefaultAsync();
-
-        if (_profile is null)
+        if (AuthenticationState != null)
         {
-            NavigationManager.NavigateTo("notfound");
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles.FirstOrDefaultAsync(p =>
+                    p.UserName == user.Identity.Name);
+            }
         }
     }
 }
