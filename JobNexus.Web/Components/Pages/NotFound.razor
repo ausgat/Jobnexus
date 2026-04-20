@@ -1,9 +1,33 @@
 @page "/notfound"
 @using JobNexus.Web.Components.Layout
 @layout MainLayout
+<MudContainer MaxWidth="MaxWidth.Small" Class="pa-0">
+    <div class="d-flex flex-column align-center justify-center" style="min-height:70vh; text-align:center;">
 
-<p>The page you were looking for could not be found. 😭</p>
+        <MudText Style="font-size:6rem; font-weight:900; color:#ff6a00; line-height:1;">404</MudText>
 
-@code {
-    
-}
+        <MudText Typo="Typo.h5" Style="color:white; font-weight:700; margin-top:8px;">
+            Page Not Found
+        </MudText>
+
+        <MudText Style="color:#888; font-size:1rem; margin-top:12px; max-width:400px; line-height:1.6;">
+            The page you were looking for doesn't exist or has been moved.
+        </MudText>
+
+        <div class="d-flex gap-3 mt-6">
+            <MudButton Variant="Variant.Filled"
+                       Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                       StartIcon="@Icons.Material.Filled.Home"
+                       Href="/">
+                Go Home
+            </MudButton>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       StartIcon="@Icons.Material.Filled.Search"
+                       Href="/search">
+                Search Jobs
+            </MudButton>
+        </div>
+
+    </div>
+</MudContainer>

@@ -67,7 +67,8 @@ public class AdzunaNormalizer
             // -----------------------------------------------------------------------
             var applyUrl = adzunaJob.RedirectUrl;
             bool jobExists = await context.Jobs
-                .AnyAsync(j => j.ApplyUrl == applyUrl, cancellationToken);
+                .AnyAsync(j => j.ApplyUrl == adzunaJob.RedirectUrl 
+                && j.Title == adzunaJob.Title, cancellationToken);
 
             if (jobExists)
             {

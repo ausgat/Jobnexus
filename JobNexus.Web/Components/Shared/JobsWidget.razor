@@ -23,7 +23,7 @@
                     </MudLink>
                     <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">@job.Company?.CompanyName</MudText>
                     <div class="d-flex justify-space-between align-center">
-                        <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">$@job.Pay/hr</MudText>
+                        <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">@(job.Pay.HasValue ? job.Pay.Value.ToString("C0") + "/yr" : "Salary not listed")</MudText>
                         <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Filled">New</MudChip>
                     </div>
                 </MudPaper>
@@ -41,7 +41,7 @@
     protected override async Task OnInitializedAsync()
     {
         await using var context = await DbFactory.CreateDbContextAsync();
-        _jobs = await context.Jobs.OrderByDescending(j => j.DatePosted).Take(3).ToListAsync();
+        _jobs = await context.Jobs.Include(j => j.Company).OrderByDescending(j => j.DatePosted).Take(3).ToListAsync();
     }
 
 }

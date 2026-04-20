@@ -1,9 +1,11 @@
 @page "/profiles/edit"
 @attribute [Authorize]
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @using JobNexus.Core.Models
 @using JobNexus.Web.ViewModels
 @using Microsoft.AspNetCore.Authorization
+
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject NavigationManager NavigationManager
 
@@ -64,7 +66,7 @@ else
                     </MudButton>
                     <MudButton Variant="Variant.Text"
                                Color="Color.Default"
-                               Href="/profiles"
+                               Href="@($"/profiles/details?username={Profile!.UserName}")"
                                Size="Size.Large">
                         Cancel
                     </MudButton>
@@ -76,38 +78,56 @@ else
 }
 
 @code {
-    [SupplyParameterFromQuery]
-    private string? Username { get; set; }
+[CascadingParameter]
+private Task<AuthenticationState>? AuthenticationState { get; set; }
 
-    [SupplyParameterFromForm]
-    private ProfileModel? ProfileForm { get; set; }
+[SupplyParameterFromForm]
+private ProfileModel? ProfileForm { get; set; }
 
-    private Profile? Profile { get; set; }
+private Profile? Profile { get; set; }
 
-    protected override async Task OnInitializedAsync()
+protected override async Task OnInitializedAsync()
+{
+    if (AuthenticationState != null)
     {
-        await using var context = await DbFactory.CreateDbContextAsync();
-        Profile ??= await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
+        var authState = await AuthenticationState;
+        var user = authState?.User;
 
-        if (Profile is not null && Profile.UserName is not null)
+        if (user?.Identity is not null && user.Identity.IsAuthenticated)
         {
-            ProfileForm ??= new ProfileModel
+            await using var context = await DbFactory.CreateDbContextAsync();
+            Profile ??= await context.Profiles.FirstOrDefaultAsync(
+                m => m.UserName == user.Identity.Name);
+
+            if (Profile is not null && Profile.UserName is not null)
             {
-                Username = Profile.UserName,
-                Email = Profile.Email,
-                Name = Profile.Name,
-                Bio = Profile.Bio,
-                Location = Profile.Location
-            };
-        }
-        else
-        {
-            NavigationManager.NavigateTo("notfound");
+                ProfileForm ??= new ProfileModel
+                {
+                    Username = Profile.UserName,
+                    Email = Profile.Email,
+                    Name = Profile.Name,
+                    Bio = Profile.Bio,
+                    Location = Profile.Location
+                };
+                return;
+            }
         }
     }
 
+    NavigationManager.NavigateTo("notfound");
+}
     private async Task UpdateProfile()
     {
+        if (AuthenticationState != null){
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+            if (user?.Identity?.Name != Profile!.UserName)
+            {
+                NavigationManager.NavigateTo("notfound");
+                return;
+            }
+        }
+
         await using var context = await DbFactory.CreateDbContextAsync();
         context.Attach(Profile!).State = EntityState.Modified;
 
