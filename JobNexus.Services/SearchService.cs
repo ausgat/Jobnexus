@@ -22,17 +22,25 @@ public class SearchService(IDbContextFactory<JobNexusContext> contextFactory)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        var keywordPredicate = PredicateBuilder.New<Job>();
-        foreach (var k in searchQuery.Keywords)
+        // 1. Start the base query
+        var baseQuery = context.Jobs.Include(j => j.Company).AsExpandable();
+
+        // 2. Keyword Filtering (Only run if keywords exist)
+        if (searchQuery.Keywords != null && searchQuery.Keywords.Any())
         {
-            keywordPredicate = keywordPredicate.Or(j =>
-                j.Title != null && j.Title.ToLower().Contains(k.ToLower()));
-            keywordPredicate = keywordPredicate.Or(j =>
-                j.Description != null && j.Description.ToLower().Contains(k.ToLower()));
+            var keywordPredicate = PredicateBuilder.New<Job>(false); // Initialize to false for OR logic
+            foreach (var k in searchQuery.Keywords)
+            {
+                var searchWord = k.ToLower();
+                keywordPredicate = keywordPredicate.Or(j =>
+                    (j.Title != null && j.Title.ToLower().Contains(searchWord)) ||
+                    (j.Description != null && j.Description.ToLower().Contains(searchWord)));
+            }
+            baseQuery = baseQuery.Where(keywordPredicate);
         }
-        
-        // Just add keywords for employment type since we don't have a specific property in the database
-        List<string> employmentKeywords = [""];
+
+        // 3. Employment Type Filtering (Only run if a specific type is requested)
+        var employmentKeywords = new List<string>();
         switch (searchQuery.EmploymentType)
         {
             case EmploymentType.FullTime:
@@ -48,33 +56,37 @@ public class SearchService(IDbContextFactory<JobNexusContext> contextFactory)
                 employmentKeywords = ["temporary"];
                 break;
         }
-        var employmentPredicate = PredicateBuilder.New<Job>();
-        foreach (var k in employmentKeywords)
+
+        if (employmentKeywords.Any())
         {
-            employmentPredicate = employmentPredicate.Or(j =>
-                j.Title != null && j.Title.ToLower().Contains(k.ToLower()));
-            employmentPredicate = employmentPredicate.Or(j =>
-                j.Description != null && j.Description.ToLower().Contains(k.ToLower()));
+            var employmentPredicate = PredicateBuilder.New<Job>(false);
+            foreach (var k in employmentKeywords)
+            {
+                var searchWord = k.ToLower();
+                employmentPredicate = employmentPredicate.Or(j =>
+                    (j.Title != null && j.Title.ToLower().Contains(searchWord)) ||
+                    (j.Description != null && j.Description.ToLower().Contains(searchWord)));
+            }
+            baseQuery = baseQuery.Where(employmentPredicate);
         }
 
-        var baseQuery = context.Jobs.Include(j => j.Company).AsExpandable()
-            .Where(keywordPredicate)
-            .Where(employmentPredicate) // Require employment keywords to be found (AND)
-            .Where(j => searchQuery.Company == null
-                        || (j.Company != null && j.Company.CompanyName!.ToLower()
-                            .Contains(searchQuery.Company.ToLower())))
+        // 4. Standard Filtering
+        baseQuery = baseQuery
+            .Where(j => searchQuery.Company == null || 
+                        (j.Company != null && j.Company.CompanyName!.ToLower().Contains(searchQuery.Company.ToLower())))
             .Where(j => searchQuery.DatePostedAfter == null || j.DatePosted >= searchQuery.DatePostedAfter)
             .Where(j => searchQuery.MinPay == null || j.Pay >= searchQuery.MinPay)
             .Where(j => searchQuery.MaxPay == null || j.Pay <= searchQuery.MaxPay);
+
+        // 5. Execution
         var countQuery = await baseQuery.CountAsync();
+        
         var paginatedQuery = await baseQuery
             .OrderByDescending(j => j.DatePosted)
             .Skip(Math.Max((searchQuery.PageNumber - 1) * searchQuery.ResultsPerPage, 0))
             .Take(searchQuery.ResultsPerPage)
             .ToListAsync();        
 
-        var searchResults = new SearchResults(paginatedQuery, searchQuery.ResultsPerPage, countQuery);
-
-        return searchResults;
+        return new SearchResults(paginatedQuery, searchQuery.ResultsPerPage, countQuery);
     }
 }

@@ -1,10 +1,13 @@
-﻿using JobNexus.Core.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using JobNexus.Core.Models;
 using JobNexus.Core.Search;
 using JobNexus.Data;
 using JobNexus.Services;
 using JobNexus.Tests.Base;
-using Microsoft.Extensions.Logging.EventSource;
-using Microsoft.Extensions.Options;
+using Xunit;
 
 namespace JobNexus.Tests;
 
@@ -13,94 +16,91 @@ public class SearchTest : DbTestBase
     [Fact]
     public async Task Search_Keywords_ReturnsCorrectResults()
     {
-        // Create the DB context for the database
-        await using var db = CreateContext();
-        
-        // Inject the search service connected to the database with a factory
+        // 1. Create context using the Factory to ensure the SearchService looks at the exact same data
+        await using var db = Factory.CreateDbContext();
         var search = new SearchService(Factory);
 
-        // Create example jobs
+        // 2. Create example jobs
         var softwareEngineerJob = new Job
         {
             Title = "Software Engineer",
             Description = "Designs software and writes code",
-            DatePosted = new DateTime(2025, 12, 1),
+            DatePosted = DateTime.UtcNow,
             Pay = 100000
         };
         var janitorJob = new Job
         {
             Title = "Janitor",
             Description = "Cleans up messes",
-            DatePosted = new DateTime(2026, 1, 5),
+            DatePosted = DateTime.UtcNow,
             Pay = 40000
         };
         var doctorJob = new Job
         {
             Title = "Doctor",
             Description = "Helps you feel better",
-            DatePosted = new DateTime(2026, 2, 20),
+            DatePosted = DateTime.UtcNow,
             Pay = 250000
         };
         
-        // Save the example jobs in the database
-        db.Jobs.AddRange([softwareEngineerJob, janitorJob, doctorJob]);
-        await db.SaveChangesAsync();
+        // 3. Save the example jobs in the database
+        db.Jobs.AddRange(softwareEngineerJob, janitorJob, doctorJob);
+        await db.SaveChangesAsync(); // CRITICAL: Commit to DB before searching
         
-        // Search for all possible jobs
+        // 4. Search for all possible jobs (Empty Query)
         var results = await search.SearchAsync(new SearchQuery());
+        Assert.Equal(3, results.Jobs.Count);
 
-        // Get the IDs of the job listing results (comparing objects doesn't work; you must use IDs)
-        var resultIds = results.Jobs.Select(j => j.JobId).ToList();
-
-        // Make sure we're returning the right results
-        Assert.Equal(3, resultIds.Count);
-        Assert.Contains(softwareEngineerJob.JobId, resultIds);
-        Assert.Contains(janitorJob.JobId, resultIds);
-        Assert.Contains(doctorJob.JobId, resultIds);
-
-        // Perform more tests with a search for the "software" keyword
-        results = await search.SearchAsync(new SearchQuery{Keywords = ["software"]});
-        resultIds = results.Jobs.Select(j => j.JobId).ToList();
+        // 5. Search for the "Software" keyword
+        var keywordResults = await search.SearchAsync(new SearchQuery { Keywords = ["Software"] });
         
-        // Make sure we're only getting the software engineer job
-        Assert.Single(resultIds);
-        Assert.Contains(softwareEngineerJob.JobId, resultIds);
-        Assert.DoesNotContain(janitorJob.JobId, resultIds);
-        Assert.DoesNotContain(doctorJob.JobId, resultIds);
+        // 6. Assert using IDs to avoid Entity Framework reference tracking mismatches
+        Assert.Single(keywordResults.Jobs);
+        Assert.Contains(keywordResults.Jobs, j => j.JobId == softwareEngineerJob.JobId);
+        Assert.DoesNotContain(keywordResults.Jobs, j => j.JobId == janitorJob.JobId);
+        Assert.DoesNotContain(keywordResults.Jobs, j => j.JobId == doctorJob.JobId);
     }
     
     [Fact]
     public async Task Search_Company_ReturnsCorrectResults()
     {
-        // Connect to the database and inject the search service
-        await using var db = CreateContext();
+        // 1. Connect to the database and inject the search service using the same factory
+        await using var db = Factory.CreateDbContext();
         var search = new SearchService(Factory);
 
-        // Create 2 example jobs
-        var job1 = new Job();
-        var job2 = new Job();
+        // 2. Create example jobs with data so they aren't null
+        var job1 = new Job { Title = "iOS Developer", Description = "Builds iPhone apps" };
+        var job2 = new Job { Title = "Windows System Admin", Description = "Manages servers" };
 
-        // Create the example companies with the example jobs listed
+        // 3. Create the example companies with the example jobs listed
         var fruitOfTheLoomCompany = new Company
         {
             CompanyName = "Apple",
-            Jobs = [job1]
+            Jobs = new List<Job> { job1 }
         };
         var mickyMouseCompany = new Company
         {
             CompanyName = "Microsoft",
-            Jobs = [job2]
+            Jobs = new List<Job> { job2 }
         };
-        db.Companies.AddRange([fruitOfTheLoomCompany, mickyMouseCompany]);
-
-        // Search for jobs belonging to Apple
-        var results = await search.SearchAsync(new SearchQuery{Company = "Apple"});
-        Assert.Contains(job1, results.Jobs);
-        Assert.DoesNotContain(job2, results.Jobs);
         
-        // Search for jobs belonging to Microsoft
-        results = await search.SearchAsync(new SearchQuery{Company = "Microsoft"});
-        Assert.Contains(job2, results.Jobs);
-        Assert.DoesNotContain(job1, results.Jobs);
+        db.Companies.AddRange(fruitOfTheLoomCompany, mickyMouseCompany);
+        await db.SaveChangesAsync(); // CRITICAL: Commit to DB before searching
+
+        // 4. Search for jobs belonging to Apple
+        var appleResults = await search.SearchAsync(new SearchQuery { Company = "Apple" });
+        
+        // 5. Verify we got the right job back by ID
+        Assert.NotEmpty(appleResults.Jobs);
+        Assert.Contains(appleResults.Jobs, j => j.JobId == job1.JobId);
+        Assert.DoesNotContain(appleResults.Jobs, j => j.JobId == job2.JobId);
+        
+        // 6. Search for jobs belonging to Microsoft
+        var msResults = await search.SearchAsync(new SearchQuery { Company = "Microsoft" });
+        
+        // 7. Verify we got the right job back by ID
+        Assert.NotEmpty(msResults.Jobs);
+        Assert.Contains(msResults.Jobs, j => j.JobId == job2.JobId);
+        Assert.DoesNotContain(msResults.Jobs, j => j.JobId == job1.JobId);
     }
 }
