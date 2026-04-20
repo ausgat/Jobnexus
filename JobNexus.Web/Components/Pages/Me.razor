@@ -1,0 +1,99 @@
+@page "/me"
+@attribute [Authorize]
+@using JobNexus.Core.Models
+@using JobNexus.Data
+@using JobNexus.Web.Components.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<JobNexusContext> DbContextFactory
+
+<PageTitle>My Profile</PageTitle>
+
+<div class="mb-6">
+    <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">My Profile</MudText>
+    <MudText Style="color:#999; margin-top:4px;">Edit your profile here</MudText>
+</div>
+@if (_currentProfile is null)
+{
+    <p><em>Loading...</em></p>
+}
+else {
+    <MudCard Elevation="4" Class="pa-5 mb-6"
+             Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a;">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Color="Color.Secondary">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default"/>
+                </MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body1">@_currentProfile.Name</MudText>
+                <MudText Typo="Typo.body2">@@@_currentProfile.UserName</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudTooltip Text="Edit Profile">
+                    <MudIconButton
+                        Icon="@Icons.Material.Filled.Edit"
+                        Color="Color.Default"
+                        Href="@($"/profiles/edit?username={_currentProfile.UserName}")"/>
+                </MudTooltip>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudSimpleTable Elevation="0">
+                        <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <td>@_currentProfile.Name</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>@_currentProfile.Email</td>
+                        </tr>
+                        <tr>
+                            <th>Bio</th>
+                            <td>@_currentProfile.Bio</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>@_currentProfile.Location</td>
+                        </tr>
+                        </tbody>
+                    </MudSimpleTable>
+                </MudItem>
+                <MudItem xs="6">
+                    <CertificationList Username="@_currentProfile.UserName" />
+                </MudItem>
+                <MudItem xs="6">
+                    <SkillList Username="@_currentProfile.UserName" />
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles.FirstOrDefaultAsync(p =>
+                    p.UserName == user.Identity.Name);
+            }
+        }
+    }
+}

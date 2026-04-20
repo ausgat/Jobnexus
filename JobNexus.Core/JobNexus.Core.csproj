@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.14" />
+      <PackageReference Include="MudBlazor" Version="9.3.0" />
+    </ItemGroup>
+
 </Project>

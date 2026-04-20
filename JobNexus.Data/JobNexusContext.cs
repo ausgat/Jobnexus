@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using JobNexus.Core.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace JobNexus.Data;
 
-public partial class JobNexusContext : DbContext
+public partial class JobNexusContext : IdentityDbContext<Profile>
 {
     public JobNexusContext()
     {
@@ -36,6 +37,8 @@ public partial class JobNexusContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.Entity<Certification>(entity =>
         {
             entity.HasKey(e => e.CertId).HasName("PRIMARY");
@@ -55,7 +58,7 @@ public partial class JobNexusContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("username");
 
-            entity.HasOne(d => d.UsernameNavigation).WithMany(p => p.Certifications)
+            entity.HasOne(d => d.Profile).WithMany(p => p.Certifications)
                 .HasForeignKey(d => d.Username)
                 .HasConstraintName("Certification_ibfk_1");
         });
@@ -88,19 +91,19 @@ public partial class JobNexusContext : DbContext
 
             entity.Property(e => e.JobId).HasColumnName("Job_id");
             entity.Property(e => e.ApplyUrl)
-                .HasMaxLength(50)
+                .HasMaxLength(200)
                 .HasColumnName("apply_url");
             entity.Property(e => e.CompanyId).HasColumnName("company_id");
             entity.Property(e => e.DatePosted)
                 .HasColumnType("datetime")
                 .HasColumnName("date_posted");
             entity.Property(e => e.Description)
-                .HasMaxLength(100)
+                .HasMaxLength(1000)
                 .HasColumnName("description");
             entity.Property(e => e.Pay).HasColumnName("pay");
             entity.Property(e => e.SourceId).HasColumnName("source_id");
             entity.Property(e => e.Title)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .HasColumnName("title");
 
             entity.HasOne(d => d.Company).WithMany(p => p.Jobs)
@@ -126,28 +129,16 @@ public partial class JobNexusContext : DbContext
 
         modelBuilder.Entity<Profile>(entity =>
         {
-            entity.HasKey(e => e.Username).HasName("PRIMARY");
-
             entity.ToTable("Profile");
-
-            entity.Property(e => e.Username)
-                .HasMaxLength(50)
-                .HasColumnName("username");
             entity.Property(e => e.Bio)
                 .HasMaxLength(200)
                 .HasColumnName("bio");
-            entity.Property(e => e.Email)
-                .HasMaxLength(100)
-                .HasColumnName("email");
             entity.Property(e => e.Location)
                 .HasMaxLength(200)
                 .HasColumnName("location");
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
-            entity.Property(e => e.Password)
-                .HasMaxLength(50)
-                .HasColumnName("password");
 
             entity.HasMany(d => d.Jobs).WithMany(p => p.Usernames)
                 .UsingEntity<Dictionary<string, object>>(
@@ -162,7 +153,7 @@ public partial class JobNexusContext : DbContext
                         .HasConstraintName("Applied_ibfk_1"),
                     j =>
                     {
-                        j.HasKey("Username", "JobId").HasName("PRIMARY");
+                        j.HasKey("Username", "JobId");
                         j.ToTable("Applied");
                         j.HasIndex(new[] { "JobId" }, "job_id");
                         j.IndexerProperty<string>("Username")

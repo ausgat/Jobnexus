@@ -1,0 +1,87 @@
+body {
+    background-color: #121212;
+}
+
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    color: #ffffff;
+}
+
+.container {
+    min-height: 100vh;
+}
+
+main {
+    width: 25rem;
+    background-color: #1e1e1e;
+}
+
+footer {
+    text-align: center;
+    width: 200px;
+    color: #cccccc;
+}
+
+.logo {
+    font-size: 3rem;
+    text-align: center;
+}
+
+a, a:hover {
+    color: #ff6a00;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+.form-floating > label, .form-floating > .form-control:focus ~ label {
+    color: #cccccc;
+}
+
+.form-floating > label::after {
+    background-color: transparent !important;
+}
+
+.form-control {
+    color: #ffffff !important;
+    background-color: #1e1e1e;
+}
+
+.form-control:focus, .form-control:active {
+    background-color: #1e1e1e;
+    border-color: #ff6a00;
+    box-shadow: 0 0 0 0.25rem rgb(255 106 0);
+}
+
+.form-control::placeholder, .form-control::placeholder {
+    color: #cccccc;
+}
+
+.btn-primary, .btn-primary:hover, .btn.btn-primary:active, .btn.btn-primary.active {
+    color: #ffffff;
+    background-color: #ff6a00;
+    border: none;
+}

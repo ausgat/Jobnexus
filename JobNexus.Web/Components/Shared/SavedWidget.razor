@@ -1,0 +1,62 @@
+@using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbContextFactory
+
+<MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+    <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+        <MudIcon Icon="@Icons.Material.Filled.Bookmark" Style="color:#ff6a00;" />
+        <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">Saved Jobs</MudText>
+    </div>
+
+    <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
+
+        @if (_appliedJobs != null)
+        {
+            foreach (var job in _appliedJobs.Take(3))
+            {
+                <MudPaper Class="pa-3" Style="background:#2a2a2a; border-radius:10px; border:1px solid #333;">
+                    <MudText Style="color:white; font-weight:600; font-size:0.95rem;">@job.Title</MudText>
+                    <MudText Style="color:#aaa; font-size:0.8rem;" Class="mb-2">@(job.Company?.CompanyName ?? "Unknown Company")</MudText>
+                        <div class="d-flex justify-space-between align-center">
+                        <MudText Style="color:#ff6a00; font-size:0.85rem; font-weight:600;">@(job.Pay.HasValue ? job.Pay.Value.ToString("C0") + "/yr" : "Salary not listed")</MudText>
+                        <SaveButton JobId="@job.JobId" UserName="@_currentProfile?.UserName"/>
+                    </div>
+                </MudPaper>
+            }
+        }
+
+    </div>
+
+</MudPaper>
+
+@code {
+    private List<Job>? _appliedJobs;
+    
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles.Include(p => p.Jobs).ThenInclude(j => j.Company)
+                    .FirstOrDefaultAsync(p => p.UserName == user.Identity.Name);
+                if (_currentProfile is not null)
+                {
+                    _appliedJobs = _currentProfile.Jobs.ToList();
+                }
+            }
+        }
+    }
+
+}

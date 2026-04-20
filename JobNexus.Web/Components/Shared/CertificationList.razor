@@ -1,0 +1,106 @@
+@using JobNexus.Core.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+
+<MudCard Elevation="0" Outlined="true">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Small" Class="mx-2"/>
+                <MudText Typo="Typo.h6">Certifications</MudText>
+            </MudStack>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudTooltip Text="Add a Certification">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="@ToggleCertForm" />
+            </MudTooltip>
+            <MudPopover Open="@_certFormOpen">
+                <MudStack Row="true" Spacing="2" Class="p-2">
+                    <MudFocusTrap DefaultFocus="DefaultFocus.FirstChild">
+                        <MudTextField T="string" @bind-Value="_certFormText"
+                                      Label="Certification" Variant="Variant.Outlined"
+                                      Margin="Margin.Dense" />
+                    </MudFocusTrap>
+                    <MudIconButton Icon="@Icons.Material.Filled.Cancel" Color="Color.Default" OnClick="@CloseCertForm"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Primary" OnClick="@AddCert"/>
+                </MudStack>
+            </MudPopover>
+        </CardHeaderActions>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="@_certs" Context="cert"
+                  Hover="true" Breakpoint="Breakpoint.Xs" Dense="true" Elevation="0">
+            <RowTemplate>
+                <MudTd>@cert.CertName</MudTd>
+                <MudTd Style="text-align: right">
+                    <MudIconButton
+                        Icon="@Icons.Material.Filled.Delete"
+                        OnClick="@(() => RemoveCert(cert.CertId))" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string? Username { get; set; }
+    
+    private List<Certification> _certs = [];
+    private bool _certFormOpen;
+    private string _certFormText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var profile = await context.Profiles.Include("Certifications")
+            .FirstOrDefaultAsync(m => m.UserName == Username);
+
+        if (profile is not null)
+        {
+            _certs = profile.Certifications.ToList();
+        }
+    }
+
+    private void ToggleCertForm() => _certFormOpen = !_certFormOpen;
+
+    private void CloseCertForm()
+    {
+        _certFormOpen = false;
+        _certFormText = "";
+    }
+
+    private async Task AddCert()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var profile = await context.Profiles.FirstOrDefaultAsync(m => m.UserName == Username);
+
+        if (profile is not null && !string.IsNullOrWhiteSpace(_certFormText))
+        {
+            var newCert = new Certification { CertName = _certFormText };
+            profile.Certifications.Add(newCert);
+            await context.SaveChangesAsync();
+            _certs.Add(newCert);
+            CloseCertForm();
+        }
+    }
+
+    private async Task RemoveCert(int certId)
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var profile = await context.Profiles
+            .Include(profile => profile.Certifications)
+            .FirstOrDefaultAsync(m => m.UserName == Username);
+
+        if (profile is not null)
+        {
+            var cert = profile.Certifications.FirstOrDefault(m => m.CertId == certId);
+            if (cert is not null)
+            {
+                profile.Certifications.Remove(cert);
+                await context.SaveChangesAsync();
+                _certs.RemoveAll(c => c.CertId == certId);
+            }
+        }       
+    }
+}

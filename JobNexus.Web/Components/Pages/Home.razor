@@ -1,7 +1,59 @@
-﻿@page "/"
+@page "/"
+@attribute [Authorize]
+@using JobNexus.Web.Components.Shared
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager NavigationManager
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard — JobNexus</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
 
-Welcome to your new app.
+    <!-- Welcome Header -->
+    <div class="d-flex justify-space-between align-center mb-6 flex-wrap gap-3">
+        <div>
+            <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">Welcome back!</MudText>
+            <MudText Style="color:#999; margin-top:4px;">Here's what's happening with your job search.</MudText>
+        </div>
+        <MudButton Variant="Variant.Filled"
+                   Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                   StartIcon="@Icons.Material.Filled.Search"
+                   OnClick="@(() => NavigationManager.NavigateTo("/search"))">
+            Find Jobs
+        </MudButton>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <MudGrid Spacing="4">
+
+        <!-- New Job Postings -->
+        <MudItem xs="12" sm="6" lg="3">
+            <JobsWidget />
+        </MudItem>
+
+        <!-- Saved Jobs -->
+        <MudItem xs="12" sm="6" lg="3">
+            <SavedWidget />
+        </MudItem>
+
+        <!-- Applications -->
+        <MudItem xs="12" sm="6" lg="3">
+            <ApplicationsWidget />
+        </MudItem>
+
+        <!-- Profile Summary -->
+        <MudItem xs="12" sm="6" lg="3">
+            <ProfileWidget />
+        </MudItem>
+
+    </MudGrid>
+
+    <!-- Quick Search Bar -->
+    <div class="d-flex justify-center mt-8">
+        <QuickSearch />
+    </div>
+
+</MudContainer>
+
+@code {
+
+}

@@ -1,0 +1,93 @@
+@using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbContextFactory
+@inject UserManager<Profile> UserManager
+
+@if (_currentProfile != null)
+{
+    <MudPaper Elevation="4" Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+        <div style="padding:16px 20px; border-bottom:2px solid #ff6a00; display:flex; align-items:center; gap:10px;">
+            <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Style="color:#ff6a00;"/>
+            <MudText Style="color:#ff6a00; font-weight:600; font-size:0.95rem;">Your Profile</MudText>
+        </div>
+
+        <div style="padding:16px; color:white; display:flex; flex-direction:column; gap:10px;">
+
+            <div class="d-flex align-center gap-3 mb-2">
+                <MudAvatar Size="Size.Large" Style="background:#ff6a00; color:white; font-weight:700;">
+                    U
+                </MudAvatar>
+                <div>
+                    <MudText Style="color:white; font-weight:600;">@_currentProfile.Name</MudText>
+                    <MudText Style="color:#aaa; font-size:0.8rem;">@_currentProfile.Email</MudText>
+                </div>
+            </div>
+
+            <MudDivider Style="border-color:#333;"/>
+
+            <div class="d-flex flex-column gap-1">
+                <div class="d-flex justify-space-between">
+                    <MudText Style="color:#888; font-size:0.85rem;">Status</MudText>
+                    <MudText Style="color:#ccc; font-size:0.85rem;">Student</MudText>
+                </div>
+                <div class="d-flex justify-space-between">
+                    <MudText Style="color:#888; font-size:0.85rem;">Degree</MudText>
+                    <MudText Style="color:#ccc; font-size:0.85rem;">Computer Science</MudText>
+                </div>
+                <div class="d-flex justify-space-between">
+                    <MudText Style="color:#888; font-size:0.85rem;">Location</MudText>
+                    <MudText Style="color:#ccc; font-size:0.85rem;">@_currentProfile.Location</MudText>
+                </div>
+            </div>
+
+            <MudDivider Style="border-color:#333;"/>
+
+            <div class="d-flex gap-2 mt-1">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           Href="@($"/profiles/details?username={@_currentProfile.UserName}")"
+                           FullWidth="true">
+                    View
+                </MudButton>
+                <MudButton Variant="Variant.Filled"
+                           Style="background:#ff6a00; color:white; font-weight:600;"
+                           Size="Size.Small"
+                           Href="@($"/profiles/edit?username={@_currentProfile.UserName}")"
+                           FullWidth="true">
+                    Edit
+                </MudButton>
+            </div>
+
+        </div>
+
+    </MudPaper>
+}
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles.FirstOrDefaultAsync(p =>
+                    p.UserName == user.Identity.Name);
+            }
+        }
+    }
+
+}

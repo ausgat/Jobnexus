@@ -1,25 +1,31 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">JobNexus</a>
-    </div>
-</div>
+﻿<MudNavMenu Class="pa-2">
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    <MudNavLink Href="/" Match="NavLinkMatch.All"
+                Icon="@Icons.Material.Filled.Dashboard"
+                IconColor="Color.Inherit"
+                Class="nav-item-custom">
+        Dashboard
+    </MudNavLink>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    <MudNavLink Href="/search"
+                Icon="@Icons.Material.Filled.Search"
+                IconColor="Color.Inherit"
+                Class="nav-item-custom">
+        Search Listings
+    </MudNavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="profiles">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Profiles
-            </NavLink>
-        </div>
+    <MudNavLink Href="/my-jobs"
+                Icon="@Icons.Material.Filled.Send"
+                IconColor="Color.Inherit"
+                Class="nav-item-custom">
+        My Jobs
+    </MudNavLink>
 
-    </nav>
-</div>
+    <MudNavLink Href="/me"
+                Icon="@Icons.Material.Filled.Person"
+                IconColor="Color.Inherit"
+                Class="nav-item-custom">
+        My Profile
+    </MudNavLink>
 
+</MudNavMenu>

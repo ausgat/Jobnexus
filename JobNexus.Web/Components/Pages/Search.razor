@@ -1,0 +1,298 @@
+@page "/search"
+@attribute [Authorize]
+@using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Authorization
+@using JobNexus.Core.Search
+@using JobNexus.Services
+@using JobNexus.Web.Components.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+@inject SearchService SearchService
+@inject AppliedJobsService AppliedJobsService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Search Jobs — JobNexus</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+
+    <!-- Page Header -->
+    <div class="mb-6">
+        <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">Search Jobs</MudText>
+        <MudText Style="color:#999; margin-top:4px;">Find your next opportunity</MudText>
+    </div>
+
+    <!-- Search Panel -->
+    <MudPaper Elevation="4" Class="pa-5 mb-6"
+              Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a;">
+
+        <MudGrid Spacing="3">
+
+            <!-- Salary slider --> 
+            <MudSlider @bind-Value="_minSalary" Min="15000" Max="250000" TickMarks="true" Step="5000" Color="Color.Info">Minimum salary: @_minSalary.ToString("C2")</MudSlider>
+            <MudSlider @bind-Value="_maxSalary" Min="15000" Max="250000" TickMarks="true" Step="5000" Color="Color.Info">Maximum salary: @_maxSalary.ToString("C2")</MudSlider>
+
+
+            <!-- Keywords -->
+            <MudItem xs="12" md="5">
+                <MudTextField T="string"
+                              Label="Keywords"
+                              Placeholder="Enter keywords"
+                              Variant="Variant.Outlined"
+                              @bind-Value="_keywordText"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              AdornmentColor="Color.Primary"/>
+            </MudItem>
+
+            <!-- Company -->
+            <MudItem xs="12" md="5">
+                <MudTextField T="string"
+                              Label="Company"
+                              Placeholder="Enter company name"
+                              Variant="Variant.Outlined"
+                              @bind-Value="_companyText"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              AdornmentColor="Color.Primary"/>
+            </MudItem>
+
+            <!-- Employment Type -->
+            <MudItem xs="12" md="5">
+                <MudText Style="color:#aaa; font-size:0.8rem; font-weight:600; letter-spacing:0.5px;" Class="mb-2">EMPLOYMENT TYPE</MudText>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var type in _employmentTypes)
+                    {
+                        <MudChip T="string"
+                                 Text="@type"
+                                 Variant="@(_employmentLevel == type ? Variant.Filled : Variant.Outlined)"
+                                 Color="@(_employmentLevel == type ? Color.Primary : Color.Default)"
+                                 OnClick="@(() => SetEmployment(type))"
+                                 Style="cursor:pointer; font-weight:500;"/>
+                    }
+                </div>
+            </MudItem>
+
+            <!-- Posted After + Search Button -->
+            <MudItem xs="12" md="2" Class="d-flex flex-column justify-end">
+                <div class="d-flex align-center mb-2">
+                    <MudCheckBox @bind-Value="_usePostedAfter" Label="Posted after" Color="Color.Primary"/>
+                </div>
+                @if (_usePostedAfter)
+                {
+                    <MudDatePicker @bind-Date="_postedAfter"
+                                   Variant="Variant.Outlined"
+                                   Class="mb-2"/>
+                }
+            </MudItem>
+
+            <!-- Search button -->
+            <MudItem xs="12" md="2" Class="d-flex flex-column justify-end">
+                <MudButton Variant="Variant.Filled"
+                           Style="background:#ff6a00; color:white; font-weight:600; border-radius:8px;"
+                           FullWidth="true"
+                           OnClick="() => HandleSearch(1)">
+                    Search
+                </MudButton>
+            </MudItem>
+
+        </MudGrid>
+
+    </MudPaper>
+
+    <!-- Results -->
+    @if (_searchResults == null)
+    {
+        <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Style="color:#444; font-size:4rem;" Class="mb-3" />
+            <MudText Typo="Typo.h6" Style="color:#666;">Enter keywords and hit Search to find jobs</MudText>
+        </div>
+    }
+    else if (_searchResults.TotalCount == 0)
+    {
+        <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
+            <MudIcon Icon="@Icons.Material.Filled.Inbox" Style="color:#444; font-size:4rem;" Class="mb-3" />
+            <MudText Typo="Typo.h6" Style="color:#666;">No jobs found — try different keywords</MudText>
+        </div>
+    }
+    else
+    {
+        <MudText Style="color:#888; font-size:0.85rem;" Class="mb-3">@_searchResults.TotalCount result(s) found</MudText>
+        <MudGrid Spacing="3">
+
+            @foreach (var job in _searchResults.Jobs)
+            {
+                <MudItem xs="12" md="6" lg="4">
+
+                    <MudPaper Elevation="6" Class="pa-5"
+                              Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a; height:100%;">
+
+                        <div class="d-flex justify-space-between align-start mb-3">
+                            <MudLink Href="@($"/jobs/details?jobid={job.JobId}")"
+                                     Typo="Typo.h6" Style="color:#ff6a00; font-weight:700; line-height:1.3;">
+                                @job.Title
+                            </MudLink>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Dark" Style="background:#2a2a2a; color:#ccc;">
+                                Full-time
+                            </MudChip>
+                        </div>
+
+                        <MudText Style="color:#bbb; font-size:0.9rem; line-height:1.5;" Class="mb-3">
+                            @job.Description
+                        </MudText>
+
+                        <div class="d-flex align-center gap-3 mb-4">
+                            <div class="d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Style="color:#ff6a00; font-size:1rem;" />
+                                <MudText Style="color:#ccc; font-size:0.85rem;">@(job.Pay.HasValue ? job.Pay.Value.ToString("C0") + "/yr" : "Salary not listed")</MudText>
+                            </div>
+                            <div class="d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Style="color:#888; font-size:0.9rem;" />
+                                <MudText Style="color:#888; font-size:0.85rem;">@(job.DatePosted?.ToString("MMM d, yyyy") ?? "Unknown")</MudText>
+                            </div>
+                        </div>
+
+                        <MudDivider Style="border-color:#2a2a2a;" Class="mb-3" />
+
+                        <div class="d-flex gap-2">
+                            <SaveButton JobId="@job.JobId" UserName="@_currentProfile?.UserName" />
+                            <MudButton Variant="Variant.Filled"
+                                       Style="background:#ff6a00; color:white; font-weight:600;"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Send"
+                                       OnClick="@(() => Apply(job))"
+                                       Disabled= "@string.IsNullOrWhiteSpace(job.ApplyUrl)">
+                                Apply
+                            </MudButton>
+                        </div>
+
+                    </MudPaper>
+
+                </MudItem>
+            }
+
+        </MudGrid>
+    }
+
+    <!-- Pagination -->
+    @if (_searchResults != null){
+        <div class="d-flex flex-column align-center justify-center" style="padding:30px 0;">
+            <MudPagination 
+                Color="Color.Primary" 
+                Count="_searchResults.PageCount" 
+                SelectedChanged="HandleSearch"
+                />
+            <MudText Align="Align.Center">Showing @_searchResults.Count out of @_searchResults.TotalCount results.</MudText>
+        </div>
+    }
+
+</MudContainer>
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    private string? QueryKeyword { get; set; }
+
+    private string _keywordText = "";
+    private string _companyText = "";
+    private string _employmentLevel = "";
+    private bool _usePostedAfter;
+    private DateTime? _postedAfter = DateTime.Now;
+    private int _minSalary = 15000;
+    private int _maxSalary = 250000; //raised
+    private int _selectedPage = 1;
+
+    private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
+
+    private SearchResults? _searchResults;
+    
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles
+                    .FirstOrDefaultAsync(p => p.UserName == user.Identity.Name);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(QueryKeyword))
+        {
+            _keywordText = QueryKeyword;
+            await HandleSearch(1);
+        }
+    }
+
+    private async Task HandleSearch(int pageNumber)
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var searchQuery = new SearchQuery
+        {
+            Keywords = _keywordText.Split(" ", options: StringSplitOptions.TrimEntries).ToList(),
+            Company = _companyText,
+            EmploymentType = ToEmploymentType(_employmentLevel),
+            ResultsPerPage = 12,
+            PageNumber = pageNumber,
+            MaxPay = _maxSalary,
+            MinPay = _minSalary
+        };
+        if (_usePostedAfter)
+        {
+            searchQuery.DatePostedAfter = _postedAfter;
+        }
+        _searchResults = await SearchService.SearchAsync(searchQuery);
+        StateHasChanged();
+    }
+    
+    private EmploymentType? ToEmploymentType(string typeStr)
+    {
+        return typeStr switch
+        {
+            "Full-time" => EmploymentType.FullTime,
+            "Part-time" => EmploymentType.PartTime,
+            "Internship" => EmploymentType.Internship,
+            "Temporary" => EmploymentType.Temporary,
+            _ => null
+        };
+    }
+
+    private void SetEmployment(string type)
+    {
+        _employmentLevel = _employmentLevel == type ? "" : type;
+    }
+
+    private void AddToInterested(Job job)
+    {
+        Console.WriteLine($"Saved: {job.Title}");
+    }
+
+    private async Task Apply(Job job)
+{
+    var record = new AppliedJobRecord
+    {
+        JobId = job.JobId,
+        Title = job.Title ?? "Unknown Job",
+        CompanyName = job.Company?.CompanyName ?? "Unknown Company",
+        DateApplied = DateTime.Now
+    };
+
+    await AppliedJobsService.AddAppliedJobAsync(record);
+
+    if (!string.IsNullOrWhiteSpace(job.ApplyUrl))
+    {
+        NavigationManager.NavigateTo(job.ApplyUrl, forceLoad: true);
+    }
+}
+
+    
+}
