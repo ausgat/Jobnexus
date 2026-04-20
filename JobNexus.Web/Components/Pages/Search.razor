@@ -8,6 +8,8 @@
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject SearchService SearchService
+@inject AppliedJobsService AppliedJobsService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Search Jobs — JobNexus</PageTitle>
 
@@ -163,7 +165,8 @@
                                        Style="background:#ff6a00; color:white; font-weight:600;"
                                        Size="Size.Small"
                                        StartIcon="@Icons.Material.Filled.Send"
-                                       OnClick="@(() => Apply(job))">
+                                       OnClick="@(() => Apply(job))"
+                                       Disabled= "@string.IsNullOrWhiteSpace(job.ApplyUrl)">
                                 Apply
                             </MudButton>
                         </div>
@@ -258,8 +261,23 @@
         Console.WriteLine($"Saved: {job.Title}");
     }
 
-    private void Apply(Job job)
+    private async Task Apply(Job job)
+{
+    var record = new AppliedJobRecord
     {
-        Console.WriteLine($"Applied to: {job.Title}");
+        JobId = job.JobId,
+        Title = job.Title ?? "Unknown Job",
+        CompanyName = job.Company?.CompanyName ?? "Unknown Company",
+        DateApplied = DateTime.Now
+    };
+
+    await AppliedJobsService.AddAppliedJobAsync(record);
+
+    if (!string.IsNullOrWhiteSpace(job.ApplyUrl))
+    {
+        NavigationManager.NavigateTo(job.ApplyUrl, forceLoad: true);
     }
+}
+
+    
 }

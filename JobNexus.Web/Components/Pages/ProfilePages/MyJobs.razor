@@ -1,0 +1,62 @@
+@page "/my-jobs"
+@attribute [Authorize]
+@using JobNexus.Core.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<Data.JobNexusContext> DbFactory
+@inject JobNexus.Services.AppliedJobsService AppliedJobsService
+
+<PageTitle>My Jobs — JobNexus</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-0">
+
+    <div class="mb-6">
+        <MudText Typo="Typo.h4" Style="color:white; font-weight:700;">My Jobs</MudText>
+        <MudText Style="color:#999; margin-top:4px;">Jobs you have applied to</MudText>
+    </div>
+
+    @if (_appliedJobs == null)
+    {
+        <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" Class="mb-3" />
+            <MudText Style="color:#666;">Loading applied jobs...</MudText>
+        </div>
+    }
+    else if (_appliedJobs.Count == 0)
+    {
+        <div class="d-flex flex-column align-center justify-center" style="padding:60px 0;">
+            <MudIcon Icon="@Icons.Material.Filled.Inbox" Style="color:#444; font-size:4rem;" Class="mb-3" />
+            <MudText Typo="Typo.h6" Style="color:#666;">No applied jobs yet</MudText>
+        </div>
+    }
+    else
+    {
+        <MudPaper Elevation="4" Class="pa-4"
+                  Style="background:#1e1e1e; border-radius:14px; border:1px solid #2a2a2a;">
+
+            <MudTable Items="_appliedJobs" Hover="true" Striped="true">
+                <HeaderContent>
+                    <MudTh>Job Title</MudTh>
+                    <MudTh>Company</MudTh>
+                    <MudTh>Date Applied</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Job Title">@context.Title</MudTd>
+                    <MudTd DataLabel="Company">@context.CompanyName</MudTd>
+                    <MudTd DataLabel="Date Applied">@context.DateApplied.ToString("MMM d, yyyy h:mm tt")</MudTd>
+                </RowTemplate>
+            </MudTable>
+
+        </MudPaper>
+    }
+
+</MudContainer>
+
+@code {
+    private List<AppliedJobRecord>? _appliedJobs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _appliedJobs = await AppliedJobsService.GetAppliedJobsAsync();
+    }
+}

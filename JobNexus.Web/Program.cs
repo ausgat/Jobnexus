@@ -41,6 +41,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddHostedService<JobSyncService>();
 builder.Services.AddScoped<SearchService>();
 
+//builds AppliedJobsService as a singleton, so that the same instance is used across the app and it can maintain the applied jobs state in memory
+builder.Services.AddScoped<AppliedJobsService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
