@@ -1,10 +1,11 @@
 @page "/my-jobs"
 @attribute [Authorize]
 @using JobNexus.Core.Models
+@using JobNexus.Web.Components.Shared
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<Data.JobNexusContext> DbFactory
-@inject JobNexus.Services.AppliedJobsService AppliedJobsService
+@inject IDbContextFactory<Data.JobNexusContext> DbContextFactory
 
 <PageTitle>My Jobs — JobNexus</PageTitle>
 
@@ -42,8 +43,8 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Job Title">@context.Title</MudTd>
-                    <MudTd DataLabel="Company">@context.CompanyName</MudTd>
-                    <MudTd DataLabel="Date Applied">@context.DateApplied.ToString("MMM d, yyyy h:mm tt")</MudTd>
+                    <MudTd DataLabel="Company">@context.Company?.CompanyName</MudTd>
+                    <MudTd><SaveButton JobId="@context.JobId" UserName="@_currentProfile?.UserName" /></MudTd>
                 </RowTemplate>
             </MudTable>
 
@@ -53,10 +54,30 @@
 </MudContainer>
 
 @code {
-    private List<AppliedJobRecord>? _appliedJobs;
+    private List<Job>? _appliedJobs;
+    
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
 
     protected override async Task OnInitializedAsync()
     {
-        _appliedJobs = await AppliedJobsService.GetAppliedJobsAsync();
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles.Include(p => p.Jobs)
+                    .FirstOrDefaultAsync(p => p.UserName == user.Identity.Name);
+                if (_currentProfile is not null)
+                {
+                    _appliedJobs = _currentProfile.Jobs.ToList();
+                }
+            }
+        }
     }
 }

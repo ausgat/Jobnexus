@@ -1,0 +1,81 @@
+@using JobNexus.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<JobNexusContext> DbContextFactory
+
+@if (!_hasApplied)
+{
+    <MudButton Variant="Variant.Outlined"
+               Color="Color.Primary"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.BookmarkBorder"
+               OnClick="OnClick">
+        Save
+    </MudButton>
+}
+else
+{
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               Size="Size.Small"
+               StartIcon="@Icons.Material.Filled.BookmarkBorder"
+               OnClick="OnClick">
+        Unsave
+    </MudButton>
+}
+
+@code {
+    
+    [Parameter]
+    public string? UserName { get; set; }
+    
+    [Parameter]
+    public int JobId { get; set; }
+
+    private bool _hasApplied;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var profile = await dbContext.Profiles.Include(p => p.Jobs)
+            .FirstOrDefaultAsync(p => p.UserName == UserName);
+        if (profile is not null)
+        {
+            var job = await dbContext.Jobs.FirstOrDefaultAsync(j => j.JobId == JobId);
+            if (job != null && profile.Jobs.Contains(job))
+            {
+                _hasApplied = true;
+            }
+            else
+            {
+                _hasApplied = false;
+            }
+        }
+    }
+
+    private async Task OnClick()
+    {
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        var profile = await dbContext.Profiles.Include(p => p.Jobs)
+            .FirstOrDefaultAsync(p => p.UserName == UserName);
+        if (profile is not null)
+        {
+            var job = await dbContext.Jobs.FirstOrDefaultAsync(j => j.JobId == JobId);
+            if (job != null)
+            {
+                if (profile.Jobs.Contains(job))
+                {
+                    profile.Jobs.Remove(job);
+                    _hasApplied = false;
+                }
+                else
+                {
+                    profile.Jobs.Add(job);
+                    _hasApplied = true;
+                }
+            }
+            dbContext.Profiles.Update(profile);
+            await dbContext.SaveChangesAsync();
+        }
+    }
+    
+}

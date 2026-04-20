@@ -4,7 +4,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using JobNexus.Core.Search
 @using JobNexus.Services
-@using Microsoft.AspNetCore.Mvc.Filters
+@using JobNexus.Web.Components.Shared
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<Data.JobNexusContext> DbFactory
 @inject SearchService SearchService
@@ -154,13 +155,7 @@
                         <MudDivider Style="border-color:#2a2a2a;" Class="mb-3" />
 
                         <div class="d-flex gap-2">
-                            <MudButton Variant="Variant.Outlined"
-                                       Color="Color.Primary"
-                                       Size="Size.Small"
-                                       StartIcon="@Icons.Material.Filled.BookmarkBorder"
-                                       OnClick="@(() => AddToInterested(job))">
-                                Save
-                            </MudButton>
+                            <SaveButton JobId="@job.JobId" UserName="@_currentProfile?.UserName" />
                             <MudButton Variant="Variant.Filled"
                                        Style="background:#ff6a00; color:white; font-weight:600;"
                                        Size="Size.Small"
@@ -209,9 +204,28 @@
     private readonly List<string> _employmentTypes = new() { "Full-time", "Part-time", "Temporary", "Internship" };
 
     private SearchResults? _searchResults;
+    
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+    
+    private Profile? _currentProfile;
 
     protected override async Task OnInitializedAsync()
     {
+
+        if (AuthenticationState != null)
+        {
+            var authState = await AuthenticationState;
+            var user = authState?.User;
+
+            if (user?.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                await using var dbContext = await DbFactory.CreateDbContextAsync();
+                _currentProfile = await dbContext.Profiles
+                    .FirstOrDefaultAsync(p => p.UserName == user.Identity.Name);
+            }
+        }
+
         if (!string.IsNullOrEmpty(QueryKeyword))
         {
             _keywordText = QueryKeyword;
@@ -237,6 +251,7 @@
             searchQuery.DatePostedAfter = _postedAfter;
         }
         _searchResults = await SearchService.SearchAsync(searchQuery);
+        StateHasChanged();
     }
     
     private EmploymentType? ToEmploymentType(string typeStr)
