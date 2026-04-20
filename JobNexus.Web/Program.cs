@@ -38,7 +38,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddHostedService<JobSyncService>();
+
+if (Environment.GetEnvironmentVariable("NO_JOB_SYNC") != "true")
+    builder.Services.AddHostedService<JobSyncService>();
+
 builder.Services.AddScoped<SearchService>();
 
 //builds AppliedJobsService as a singleton, so that the same instance is used across the app and it can maintain the applied jobs state in memory

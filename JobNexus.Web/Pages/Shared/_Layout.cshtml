@@ -1,5 +1,3 @@
-@using Microsoft.AspNetCore.Mvc.ViewEngines
-@using MudBlazor
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,8 +7,7 @@
 
     <environment include="Development">
         <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.css" />
-        <link rel="stylesheet" href="~/Identity/css/site.css" />
-        <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="/css/login.css" />
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
@@ -22,26 +19,16 @@
     </environment>
 </head>
 <body>
-<component type="typeof(MudThemeProvider)" render-mode="ServerPrerendered" />
-
-<div class="d-flex justify-center align-center" style="min-height:80vh;">
+<div class="container d-flex flex-column justify-content-center align-items-center">
     <partial name="_CookieConsentPartial" optional/>
-    <main role="main" class="mud-paper mud-elevation-4 pa-4 rounded-lg">
+    <div class="logo">JobNexus</div>
+    <main role="main" class="p-4 rounded">
         @RenderBody()
     </main>
-</div>
-<footer class="footer border-top pl-3">
-    <div class="mud-text-secondary container text-center">
+    <footer class="small pt-3">
         &copy; 2026 - JobNexus
-        @{
-            var foundPrivacy = Url.Page("/Privacy", new { area = "" });
-        }
-        @if (foundPrivacy != null)
-        {
-            <a asp-area="" asp-page="/Privacy">Privacy</a>
-        }
-    </div>
-</footer>
+    </footer>
+</div>
 
 <environment include="Development">
     <script src="~/Identity/lib/jquery/dist/jquery.js"></script>
